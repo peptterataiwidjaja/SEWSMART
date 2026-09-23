@@ -1,0 +1,535 @@
+Nomor Inventaris,Nama Mesin,Merk,Tanggal Pembelian,Location,Made In,Kondisi Mesin,Mesin Yang Tersedia,Kelompok Mesin
+TW-MPP-00001,Mesin Jarum 1  S7180A,Brother,2021-10-21 00:00:00,TW1,Vietnam,Rusak,1,SN
+TW-MPP-00002,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00003,Steam Boiler Listrik,Nissin,2020-04-06 00:00:00,TW38,China,Normal,1,Helper
+TW-MPP-00004,Mesin Jarum 1  S7180A,Brother,2021-10-21 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00005,Mesin Jarum 1 (DDL-900B,Juki,2018-09-27 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00006,Mesin Jarum 1  S7180A,Brother,2021-10-21 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00007,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00008,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00009,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00011,Mesin Jarum 1  S7180A,Brother,2022-06-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00012,Mesin Jarum 1  S7180A,Brother,2022-06-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00013,Mesin Jarum 1  S7180A,Brother,2022-08-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00015,Mesin Jarum 1  S7180A,Brother,2023-04-12 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00016,Mesin Bordir Dua Kepala,Azura,2019-07-01 00:00:00,TW1,China,Normal,1,Helper
+TW-MPP-00017,Mesin Potong Pola Kertas,J-Wei,2019-04-12 00:00:00,TW1,China,Normal,1,Manual
+TW-MPP-00018,Mesin Gulung Benang WJ-20S,Weijie,2023-04-03 00:00:00,TW1,China,Normal,1,Threader
+TW-MPP-00019,Mesin Jarum 1 S7100A,Brother,2021-10-21 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00020,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00021,Mesin Jarum 1  S7180A,Brother,2023-04-12 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00022,Mesin Jarum 1  S7180A,Brother,2023-04-12 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00023,Mesin Jarum 1  S7180A,Brother,2022-08-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00024,Mesin Pasang Tangan,Durkop,2021-03-25 00:00:00,TW1,Germany,Normal,1,Lain-lain
+TW-MPP-00025,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00026,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00028,Mesin Obras MO-6800JUKI,Juki,2018-08-07 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00029,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00030,Mesin Jarum 1  S7180A,Brother,2023-04-12 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00031,Mesin Jarum 1  S7180A,Brother,2023-04-12 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00281,Mesin jarum 1 S-7180a ,Brother,2021-10-26 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00033,Mesin Obras MO-6816D JUKI,Juki,2023-02-24 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00471,Mesin Soom JC 9330-0,Brother,2025-07-03 00:00:00,TW38,China,Normal,1,Soom
+TW-MPP-00035,Mesin Jarum 1  S7180A,Brother,2023-04-12 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00037,Mesin Press NS-450MS,Nissin,2022-11-08 00:00:00,TW1,Indonesia,Normal,1,Maica
+TW-MPP-00038,Mesin Press HP-900LFS,Hashima,2019-04-12 00:00:00,TW1,Jepang,Normal,1,Maica
+TW-MPP-00039,Mesin Lubang Kancing QQ RH-982A,Brother,2022-08-01 00:00:00,TW1,China,Normal,1,Mesin QQ
+TW-MPP-00040,Mesin BASS HOKI,Hoki,2023-04-19 00:00:00,TW1,Indonesia,Normal,1,Bass
+TW-MPP-00041,Mesin Make Up MS-1190,Juki,2022-07-01 00:00:00,TW1,China,Normal,1,Makeup
+TW-MPP-00042,Mesin Bobok Kantong APW-895N,Juki,2022-09-01 00:00:00,TW1,Indonesia,Normal,1,APW
+TW-MPP-00043,Mesin Pasang Kancing  BE-438 C,Brother,2010-02-01 00:00:00,TW1,China,Rusak,1,Pasang Kancing
+TW-MPP-00044,Mesin Lubang Kancing HE-800C-2,Brother,2020-02-13 00:00:00,TW1,China,Normal,1,Button Holer
+TW-MPP-00046,Mesin Jarum 1  S7180A,Brother,2022-10-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00047,Mesin Jarum 1  S7180A,Brother,2022-10-01 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00048,Mesin Jarum 1  S7180A,Brother,2022-10-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00049,Mesin Obras MO-6816S JUKI,Juki,2022-07-01 00:00:00,TW1,China,Normal,1,OL 3
+TW-MPP-00507,Mesin Make Up MS-1190,Juki,2024-11-01 00:00:00,TW1,China,Normal,1,Makeup
+TW-MPP-00055,Mesin Press Buaya,,2019-04-12 00:00:00,TW1,China,Rusak,1,Maica
+TW-MPP-00056,Mesin Jarum 1 S7100,Brother,2005-12-05 00:00:00,TW1,Indonesia,Normal,1,SN
+TW-MPP-00057,Mesin Jarum 1 Manual FY8700,Feiyue,2008-05-10 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00058,Mesin Jarum 1  ZJ9701R-D3,Zoje,2011-11-28 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00059,Mesin Jarum 1  ZJ9701R-D3,Zoje,2011-11-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00060,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00062,Mesin Jarum 1  ZJ9701R-D3,Zoje,2011-11-28 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00063,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00064,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00065,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00066,Meja Gosok,,2010-02-01 00:00:00,TW1,China,Normal,1,Ironning
+TW-MPP-00067,Meja gosok,,2016-01-01 00:00:00,TW1,Jepang,Normal,1,Ironning
+TW-MPP-00068,Mesin Bartack KE-430FS,Brother,2019-04-12 00:00:00,TW38,China,Normal,1,Bartack
+TW-MPP-00069,Mesin Jarum 1 (DDL-900B),Juki,2018-09-27 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00071,Mesin Ban Karet YAMATA,Yamata,2008-04-10 00:00:00,TW38,China,Normal,1,"Kansai 7/8""+Cr"
+TW-MPP-00072,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00073,Mesin Jarum 1 (DDL-900B),Juki,2018-09-27 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00074,Mesin Jarum 1 (DDL-900B),Juki,2021-10-21 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00075,Steam Boiler Listrik,Nissin,2020-04-06 00:00:00,TW1,China,Normal,1,Helper
+TW-MPP-00076,Mesin Bartack KE-430FS,Brother,2018-07-01 00:00:00,TW1,China,Normal,1,Bartack
+,--,,,TIDAK DITEMUKAN,,Normal,1,Manual
+TW-MPP-00079,Mesin SIDE CUTTER GC6170 ,Typical,2013-12-01 00:00:00,TW38,China,Normal,1,SC
+TW-MPP-00080,Mesin Jarum 2 Brother T-8450C-003,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00081,Mesin Pasang Kancing BE-438 D,Brother,2007-08-08 00:00:00,TW1,China,Rusak,1,Pasang Kancing
+TW-MPP-00082,Mesin Obras Corong M700 HOKI,Hoki,2023-04-03 00:00:00,TW38,China,Normal,1,OL 4 + Cr
+TW-MPP-00083,Mesin Tandem GC0058,Typical,2016-09-01 00:00:00,TW38,China,Normal,1,Tandem
+TW-MPP-00084,Mesin Tali Loop(Over Deck) FY2700,Feiyue,2009-04-01 00:00:00,TW1,China,Normal,1,Overdeck
+TW-MPP-00086,Mesin Make Up DA-927086,Brother,2021-01-18 00:00:00,TW38,China,Normal,1,Makeup
+TW-MPP-00472,Mesin Soom JC 9330-0,Brother,2025-08-03 00:00:00,TW38,China,Normal,1,Soom
+TW-MPP-00089,Mesin Jarum 2 GC842,Nissin,2016-09-01 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00090,Mesin  SIDE CUTTER,Zoje,,TERJUAL,China,Terjual,1,SC
+TW-MPP-00091,Mesin Jarum 2 GC842,Nissin,,TW38,China,Normal,1,SN
+TW-MPP-00092,Mesin Obras MO-6700 JUKI,Juki,2011-05-01 00:00:00,TW38,China,Rusak,1,OL 3
+TW-MPP-00095,Meja Gosok,,2005-12-05 00:00:00,TW1,Indonesia,Normal,1,Ironning
+TW-MPP-00096,Meja Gosok,,2010-02-01 00:00:00,TW38,Indonesia,Rusak,1,Ironning
+TW-MPP-00097,Meja Gosok Megochi,megochi,2019-09-18 00:00:00,TW1,Indonesia,Normal,1,Ironning
+TW-MPP-00100,Mesin Jarum 1  S7180A,Brother,2023-02-10 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00103,Meja Gosok,,2010-02-01 00:00:00,TW1,Indonesia,Normal,1,Ironning
+TW-MPP-00104,Meja Gosok,,2020-03-01 00:00:00,TW1,Indonesia,Normal,1,Ironning
+TW-MPP-00105,Meja Gosok,,2010-02-01 00:00:00,TW1,Indonesia,Normal,1,Ironning
+TW-MPP-00106,Meja Gosok,,2010-02-01 00:00:00,TW1,Indonesia,Normal,1,Ironning
+TW-MPP-00107,Meja Gosok,,2010-02-01 00:00:00,TW1,Indonesia,Normal,1,Ironning
+TW-MPP-00108,Mesin Obras MO-6814 JUKI,Juki,2023-04-06 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00110,Mesin Jarum 1  S7180A,Brother,2023-02-10 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00112,Mesin GERBER Potong Otomatis Gelaran Tebal,Gerber,2022-02-05 00:00:00,TW1,China,Normal,1,Manual
+TW-MPP-00477,Mesin Jarum 1 S7180A,Brother,2024-12-19 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00115,Meja Gosok,,2010-02-01 00:00:00,TIDAK DITEMUKAN,Indonesia,Rusak,1,Ironning
+TW-MPP-00116,Meja Gosok,,2010-02-01 00:00:00,TW38,Indonesia,Rusak,1,Ironning
+TW-MPP-00517,Mesin Lubang Kancing HE-800C-2,Brother,2022-06-19 00:00:00,TW1,China,Normal,1,Button Holer
+TW-MPP-00119,Mesin Jarum 1  ZJ9701R-D3,Zoje,2011-11-28 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00120,Boiler Gas,,2006-06-01 00:00:00,TW1,Indonesia,Normal,1,Helper
+TW-MPP-00121,Boiler Solar,,2000-01-01 00:00:00,TW1,Indonesia,Normal,1,Helper
+TW-MPP-00327,Mesin BASS BRC-T3520MA,Bruce,2025-04-26 00:00:00,TW38,China,Normal,1,Bass
+TW-MPP-00125,Mesin Jarum 1  S7180A,Brother,2020-07-13 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00126,Mesin Jarum 1 (DDL-900B),Juki,2019-02-02 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00127,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00128,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00131,Mesin Jarum 1 (DDL8700B-7),Juki,2016-01-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00132,Mesin Jarum 1  S7180A,Brother,2020-07-13 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00133,Mesin Jarum 1 S7100H,Brother,2020-07-13 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00134,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00135,Mesin Jarum 1  S7180A,Brother,2020-07-13 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00136,Mesin Jarum 1  S7180A,Brother,2020-07-13 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00137,Mesin Jarum 1  S7180A,Brother,2020-07-13 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00138,Mesin Jarum 1  S7180A,Brother,2020-07-13 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00139,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00339,Mesin BASS BRC-T3520MA,Bruce,2025-04-26 00:00:00,TW38,China,Normal,1,Bass
+TW-MPP-00141,Mesin Jarum 1  S7180A,Brother,2020-07-13 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00142,Meja Gosok Suesei,Suesei,2020-03-20 00:00:00,TW1,Indonesia,Normal,1,Ironning
+TW-MPP-00143,Mesin Jarum 1 (DDL-900B),Juki,2019-02-02 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00145,Mesin Jarum 1  S7180A,Brother,2020-07-13 00:00:00,TERJUAL,China,Normal,1,SN
+TW-MPP-00146,Mesin Jarum 1  S7180A,Brother,2020-07-13 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00147,Mesin Pasang Tangan,Durkop,2021-03-25 00:00:00,TW38,Germany,Normal,1,Lain-lain
+TW-MPP-00148,Mesin Jarum 1  S7180A,Brother,2022-10-01 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00149,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00150,Mesin Jarum 1 (DDL-900B),Juki,2019-04-12 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00151,Mesin Jarum 1  S7180A,Brother,2022-08-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00152,Meja Gosok Suesei,Suesei,2010-02-01 00:00:00,TW38,Indonesia,Normal,1,Ironning
+TW-MPP-00153,Mesin Pasang Kancing BE-438HS,Brother,2022-06-01 00:00:00,TW1,China,Normal,1,Pasang Kancing
+TW-MPP-00159,Mesin Tandem MS0058-1A-2,Mitsubishi,2010-02-01 00:00:00,TW38,China,Normal,1,Tandem
+TW-MPP-00160,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00161,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00162,Mesin Jarum 1  S7180A,Brother,2022-10-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00163,Mesin Bordir Barudan BEKS-Y920 (600X300/300 MM),Barudan,2021-01-28 00:00:00,TW1,China,Normal,1,Helper
+TW-MPP-00164,Stabilizer Digital 6 KVA AVR - LD 6GT,Matsuyama,2021-01-28 00:00:00,TW1,China,Normal,1,Helper
+TW-MPP-00165,Stabilizer Digital 15 KVA AVR - LD 15 GS,Matsuyama,2021-04-10 00:00:00,TW1,Jepang,Normal,1,Helper
+TW-MPP-00166,Mesin Jarum 1 GC6180,Typical,2011-06-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00167,Mesin Obras MO-6816D JUKI,Juki,2023-04-06 00:00:00,TW1,China,Normal,1,OL 3
+TW-MPP-00168,Mesin Jarum 2 Sicama LT2-B848-380,Sicama,,TW38,China,Rusak,1,SN
+TW-MPP-00172,Mesin Jarum 1  ZJ9701R-D3,Zoje,2011-11-28 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00173,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00174,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00178,Mesin Zig Zag,Yamata,,TW38,China,Normal,1,Zigzag
+TW-MPP-00179,PNEUMATIC SNAP BUTTON / RIVET NS-Q3 / NISSIN,Nissin,2023-04-06 00:00:00,TW1,China,Normal,1,Snap Attaching
+TW-MPP-00180,Mesin Tandem GC0058,Typical,2013-01-01 00:00:00,TW1,China,Normal,1,Tandem
+TW-MPP-00628,Mesin BASS BRC-T3520MA,bruce,2024-10-25 00:00:00,TW1,China,Normal,1,Bass
+TW-MPP-00182,Mesin Jarum 1  S7180A,Brother,2023-02-10 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00183,Mesin Press NS-450MS,Nissin,2022-11-08 00:00:00,TW1,China,Normal,1,Maica
+TW-MPP-00184,Mesin Press HP-900LFS,Hashima,2019-04-12 00:00:00,TW1,Jepang,Normal,1,Maica
+TW-MPP-00185,Auto Cut J-wei CB03II-2516-RQ,J-Wei,2019-04-12 00:00:00,TW1,China,Normal,1,Manual
+TW-MPP-00188,Mesin Balik Kerah,Ngai Shing,2023-05-31 00:00:00,TW1,China,Normal,1,Lain-lain
+TW-MPP-00189,Mesin Press Manset,Ngai Shing,2023-05-31 00:00:00,TW1,China,Normal,1,Maica
+TW-MPP-00190,Mesin Pasang Gembol M-2612TZ,Maica,2023-06-06 00:00:00,TW1,China,Normal,1,Helper
+TW-MPP-00191,Mesin Tamplate  JKC-NS2-13095-LM-LC1,Jooke,2023-06-06 00:00:00,TW1,China,Normal,1,Lain-lain
+TW-MPP-00193,GENSET 250KVA,Catterpilar,2022-01-05 00:00:00,TW1,Indonesia,Normal,1,Helper
+TW-MPP-00194,Mesin Potong Karet NTK-098V,MTK (NTK-098V),2020-02-13 00:00:00,TW38,Indonesia,Normal,1,Manual
+TW-MPP-00195,Mesin Inspek Bahan,Rekondisi,2022-04-16 00:00:00,TW38,Indonesia,Normal,1,Helper
+TW-MPP-00196,Mesin Jarum 1  S7180A,Brother,2023-04-10 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00198,Automatic Voltage Regulator SVC-3000VA,Matsunaga,2023-06-07 00:00:00,TW38,China,Normal,1,Lain-lain
+TW-MPP-00199,Charger Aki,,,TW1,China,Normal,1,Helper
+TW-MPP-00200,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00201,Mesin Bartack KE-430FS,Brother,2017-12-22 00:00:00,TW1,China,Normal,1,Bartack
+TW-MPP-00202,Mesin Pasang Kancing BE-438HS,Brother,2023-04-05 00:00:00,TW1,China,Normal,1,Pasang Kancing
+TW-MPP-00203,Mesin Lubang Kancing HE-800C-2,Brother,2021-01-18 00:00:00,TW1,China,Normal,1,Button Holer
+TW-MPP-00204,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00205,Mesin Jarum 1 S7180A,Brother,2022-07-03 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00206,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00207,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00208,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00209,Mesin Obras MO-6816S JUKI,Juki,2018-08-07 00:00:00,TW1,China,Normal,1,OL 3
+TW-MPP-00210,Mesin Jarum 1  S7180A,Brother,2022-06-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00211,Mesin Jarum 1  S7180A,Brother,2022-06-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00212,Mesin Jarum 1  S7180A,Brother,2021-10-21 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00213,Mesin Jarum 1  S7180A,Brother,2022-08-01 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00214,Mesin Jarum 1 S7250A,Brother,2019-04-11 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00215,Mesin Jarum 1  S7180A,Brother,2023-04-05 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00216,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00217,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00218,Mesin Ban Karet (Kansai Plaket) DFB1404PMD,Kansai sp,2022-06-01 00:00:00,TW38,Jepang,Normal,1,"Kansai 7/8""+Cr"
+TW-MPP-00220,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00222,Mesin Jarum 1  S7180A,Brother,2022-08-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00223,Mesin Jarum 1  S7180A,Brother,2022-06-01 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00224,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00226,Mesin Obras MO-6816D JUKI,Juki,2018-08-07 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00227,Mesin Jarum 1  S7180A,Brother,2023-04-05 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00228,Mesin Obras MO-6816S JUKI,Juki,2018-08-07 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00230,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00231,Mesin Jarum 1  S7180A,Brother,2021-10-21 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00233,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00234,Mesin Jarum 1  ZJ9701R-D3,Zoje,2011-11-28 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00235,Mesin Jarum 1  S7180A,Brother,2022-10-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00236,Mesin Jarum 1  S7180A,Brother,2023-04-12 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00237,Mesin Jarum 1  S7180A,Brother,2023-04-12 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00238,Mesin Jarum 1  S7180A,Brother,2023-04-12 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00239,Mesin Jarum 1  S7180A,Brother,2022-10-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00240,Mesin Obras MO-6816S JUKI,Juki,2022-07-01 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00242,Mesin Jarum 1  S7180A,Brother,2022-10-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00244,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00245,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00246,Mesin Tali Loop(Over Deck) JK-8669ID,Jack,2020-02-01 00:00:00,TW1,China,Normal,1,Overdeck
+TW-MPP-00248,Mesin Jarum 2 ZJ845,Zoje,2016-09-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00249,Mesin Obras Corong M700 HOKI,Hoki,2023-04-03 00:00:00,TW38,China,Normal,1,OL 4 + Cr
+TW-MPP-00250,Mesin Jarum 1  S7180A,Brother,2021-10-21 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00251,Mesin Tandem MS0058-1A-2,Mitsubishi,2010-02-01 00:00:00,TW38,China,Normal,1,Tandem
+TW-MPP-00252,Mesin Obras HX6816T-03 HIKARI,Hikari,2019-04-12 00:00:00,TW38,China,Rusak,1,OL 3
+TW-MPP-00253,PNEUMATIC SNAP BUTTON / RIVET NS-Q3 / NISSIN,Nissin,2023-04-06 00:00:00,TW1,China,Normal,1,Snap Attaching
+TW-MPP-00254,Mesin Jarum 1 (DDL8700B-7),Juki,2016-01-01 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00255,Mesin Jarum 2 LH 3568A-7,Juki,2017-12-22 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00256,Mesin  SIDE CUTTER GC6170 ,Typical,2013-12-01 00:00:00,TW1,China,Rusak,1,SC
+TW-MPP-00257,Mesin Lubang Kancing Kemeja HE-800B,Brother,2019-04-12 00:00:00,TW1,China,Normal,1,Button Holer
+TW-MPP-00258,Mesin Bartack KE-430Fs-03,Brother,2021-01-18 00:00:00,TW1,China,Normal,1,Bartack
+TW-MPP-00259,Mesin Pasang Kancing BE-438HS,Brother,2023-04-05 00:00:00,TW38,China,Normal,1,Pasang Kancing
+TW-MPP-00260,Mesin pasang kancing BE-438HS,Brother,2022-06-01 00:00:00,TW1,China,Normal,1,Pasang Kancing
+TW-MPP-00262,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00263,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00264,Mesin Jarum 1  S7180A,Brother,2022-06-01 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00265,Mesin Tandem GC0058,Typical,2016-09-01 00:00:00,TW38,China,Normal,1,Tandem
+TW-MPP-00575,Mesin Obras MO-6800 JUKI,Juki,2022-07-22 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00268,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00269,Mesin Jarum 1  S7180A,Brother,2021-10-21 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00270,Mesin Jarum 1  S7180A,Brother,2022-06-01 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00271,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00272,Mesin Jarum 1  S7180A,Brother,2022-08-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00273,Mesin Jarum 1  S7180A,Brother,2023-04-05 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00275,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00276,Mesin Pasang Tangan,Durkop,2022-10-01 00:00:00,TW38,Germany,Normal,1,Lain-lain
+TW-MPP-00277,Mesin Blind Stitch HS-160-20 ,Hikari,2013-07-01 00:00:00,TW1,China,Normal,1,Blind Tack
+TW-MPP-00278,Mesin Gulung Benang Benho,Benho,2023-04-03 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00279,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00280,Mesin Jarum 2 T-8450C-003,Brother,2016-09-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00635,Mesin BASS BRC-T3520MA,Bruce,2024-12-04 00:00:00,TW38,China,Normal,1,Bass
+TW-MPP-00282,Mesin Jarum 1  S7180A,Brother,2022-08-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00283,Mesin jarum 1 S-7180a ,Brother,2021-10-26 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00284,Mesin Jarum 1 S7100A,Brother,2019-04-12 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00285,Mesin Jarum 1  S7180A,Brother,2021-10-21 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00287,Mesin Jarum 1  S7180A,Brother,2022-08-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00288,Mesin Jarum 1 DDL8000,Juki,2019-10-10 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00290,Mesin Ban Karet (Kansai Plaket) DFB1404PMD,Kansai sp,2019-04-01 00:00:00,TW1,Jepang,Normal,1,"Kansai 7/8""+Cr"
+TW-MPP-00291,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00292,Mesin Jarum 1  S7180A,Brother,2023-04-05 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00293,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00294,Mesin Jarum 1  S7180A,Brother,2023-04-12 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00295,Mesin Obras MO-6816D JUKI,Juki,2023-04-06 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00296,Mesin Pasang Kancing BE-438HS,Brother,2019-04-11 00:00:00,TW1,China,Normal,1,Pasang Kancing
+TW-MPP-00297,Mesin Soom JC 9330-0,Brother,2019-04-12 00:00:00,TW1,China,Normal,1,Soom
+TW-MPP-00299,Mesin Jarum 1  S7180A,Brother,2022-06-01 00:00:00,TW1,Vietnam,Normal,1,SN
+TW-MPP-00776,Mesin Obras MO-6816D JUKI,Juki,2023-04-06 00:00:00,TW1,China,Normal,1,OL 3
+TW-MPP-00302,Mesin Make Up ZJ927-P2D,Zoje,,TW38,China,Normal,1,Makeup
+TW-MPP-00309,Mesin Make Up MS-1190,Juki,2023-05-02 00:00:00,TW38,China,Normal,1,Makeup
+TW-MPP-00310,Mesin Lubang Kancing HE-800C-2,Brother,2023-04-10 00:00:00,TW38,China,Normal,1,Button Holer
+TW-MPP-00311,Mesin Bartack KE-430HS-03,Brother,2023-04-10 00:00:00,TW1,China,Normal,1,Bartack
+TW-MPP-00312,Mesin Jarum 1  ZJ9701R-D2,Zoje,2010-01-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00600,Mesin Gurinda duduk,domax,2025-08-07 00:00:00,TW38,China,Normal,1,Lain-lain
+TW-MPP-00340,Mesin Pasang Tangan,Durkop,2025-12-01 00:00:00,TW38,Germany,Normal,1,Lain-lain
+TW-MPP-00316,Mesin Indexer Button Holling MA04G,Maica,2024-06-25 00:00:00,TW38,China,Normal,1,Button Holer
+TW-MPP-00317,Mesin Indexer Button Holling MA04G,Maica,2024-06-25 00:00:00,TW38,China,Rusak,1,Button Holer
+TW-MPP-00323,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00324,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00325,Mesin Pasang Tangan,Durkop,2024-08-22 00:00:00,TW1,Germany,Normal,1,Lain-lain
+TW-MPP-00793,Mesin Bobok Kantong  APW-895N,Juki,2025-04-28 00:00:00,TW38,Jepang,Normal,1,APW
+TW-MPP-00772,Conveyor Mesin Press HASHIMA HP-900LFC,Hashima,2024-10-20 00:00:00,TW38,Jepang,Normal,1,Maica
+TW-MPP-00328,Mesin Overdeck Nissin NS-562-01,Nissin,2025-05-06 00:00:00,TW38,china,Normal,1,Overdeck
+TW-MPP-00330,Mesin Press HP-900LFS,Hashima,2023-04-28 00:00:00,TW38,Vietnam,Normal,1,Maica
+TW-MPP-00331,Conveyor Mesin Press HASHIMA HP-900LFC,Hashima,2024-11-20 00:00:00,TW38,Vietnam,Normal,1,Maica
+TW-MPP-00332,Mesin Press HP-900LFS,Hashima,2025-07-03 00:00:00,TW38,Vietnam,Normal,1,Maica
+TW-MPP-00436,Mesin Side Cutter H99V-7C-5/AK,Hikari,2025-06-13 00:00:00,TW38,China,Normal,1,SC
+TW-MPP-00335,Mesin BORDIR Barudan BEKY Y904 II,Barudan,2025-05-13 00:00:00,TW38,Jepang,Normal,1,Helper
+TW-MPP-00437,Mesin Side Cutter H99V-7C-5/AK,Hikari,2025-06-13 00:00:00,TW38,China,Normal,1,SC
+TW-MPP-00034,Mesin Plotter,HP,2017-02-01 00:00:00,TW38,USA,Normal,1,Helper
+TW-MPP-00181,MESIN PLOTTER,HP,2015-11-04 00:00:00,TW1,USA,Normal,1,Helper
+TW-MPP-00523,Mesin Plotter ATP JET,HP,2023-01-11 00:00:00,TW38,USA,Normal,1,Helper
+TW-MPP-00564,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00399,Mesin Lubang QQ RH-982A,Brother,2025-05-30 00:00:00,TW38,China,Normal,1,Lain-lain
+TW-MPP-00401,Mesin Obras GN-795,Typical,2009-04-03 00:00:00,TEBET,China,Normal,1,OL 3
+TW-MPP-00402,Mesin Jarum 1  S7180A,Brother,2021-10-21 00:00:00,TEBET,Vietnam,Normal,1,SN
+TW-MPP-00403,Mesin Jarum 1  ZJ9701R-D2,Zoje,2009-12-23 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00404,Mesin Lubang Kancing QQ RH-980A,Brother,2018-05-15 00:00:00,TW38,China,Rusak,1,Mesin QQ
+TW-MPP-00405,Mesin Jarum 1  S7180A,Brother,2021-10-21 00:00:00,TEBET,Vietnam,Normal,1,SN
+TW-MPP-00406,Mesin Jarum 1  ZJ9701R-D2,Zoje,2011-11-23 00:00:00,TW38,China,Terjual,1,SN
+TW-MPP-00407,Mesin Make Up DT6-8921,Brother,2017-12-01 00:00:00,TEBET,China,Normal,1,Makeup
+TW-MPP-00408,Mesin Lubang Kancing HE-800C-2,Brother,2021-10-21 00:00:00,TEBET,China,Normal,1,Button Holer
+TW-MPP-00409,Meja Gosok,,2010-02-01 00:00:00,TEBET,Indonesia,Normal,1,Ironning
+TW-MPP-00410,Gosokan,,,TW38,Indonesia,Normal,1,Ironning
+TW-MPP-00413,PNEUMATIC SNAP BUTTON JUZI,Juzi,2010-10-05 00:00:00,TW1,China,Normal,1,Snap Attaching
+TW-MPP-00414,Mesin Jarum 1  ZJ9701R-D3,Zoje,2011-11-28 00:00:00,TERJUAL,China,Terjual,1,SN
+TW-MPP-00415,Mesin SIDE CUTTER GC6170 ,Typical,2013-12-01 00:00:00,TW38,China,Normal,1,SC
+TW-MPP-00417,Mesin Side CutterH99S,Hikari,2024-01-10 00:00:00,TW38,China,Normal,1,SC
+,-,,,TIDAK DITEMUKAN,China,Rusak,1,Manual
+TW-MPP-00565,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00566,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00486,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00425,Mesin Soom JC 9330-01,Brother,2025-01-20 00:00:00,TW1,China,Normal,1,Soom
+TW-MPP-00792,Mesin Jarum 2 Brother T-8450C-003,Brother,2025-01-20 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00427,Mesin Lubang Kancing Brother HE-800C-2,Brother,2025-06-13 00:00:00,TW38,China,Normal,1,Button Holer
+TW-MPP-00428,Mesin Lubang Kancing  HE-800C-2,Brother,2025-06-13 00:00:00,TW38,China,Normal,1,Button Holer
+TW-MPP-00429,Mesin Lubang Kancing HE-800C-2,Brother,2025-06-13 00:00:00,TW38,China,Normal,1,Button Holer
+TW-MPP-00430,Mesin Pasang Kancing Brother BE-438HS,Brother,2025-06-13 00:00:00,TW38,China,Normal,1,Pasang Kancing
+TW-MPP-00431,Mesin Pasang Kancing Brother BE-438HS,Brother,2025-06-13 00:00:00,TW38,China,Normal,1,Pasang Kancing
+TW-MPP-00432,Mesin Pasang Kancing Brother BE-438HS,Brother,2025-06-13 00:00:00,TW38,China,Normal,1,Pasang Kancing
+TW-MPP-00433,Mesin Bartack Brother KE-430HS-03,Brother,2025-06-13 00:00:00,TW38,China,Normal,1,Bartack
+TW-MPP-00434,Mesin Bartack Brother KE-430HS-03,Brother,2025-06-13 00:00:00,TW38,China,Normal,1,Bartack
+TW-MPP-00435,Mesin Bartack Brother KE-430HS-03,Brother,2025-06-13 00:00:00,TW38,China,Normal,1,Bartack
+TW-MPP-00568,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00569,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00570,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00439,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00440,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00441,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00442,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00443,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00444,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00445,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00446,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00447,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00448,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00449,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00450,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00572,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00452,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00453,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00454,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00455,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00456,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00457,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00458,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00459,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00460,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00461,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00464,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00465,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00466,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00467,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00468,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00469,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00586,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00314,Mesin Tamplate  JKC-NS2-13095-LM-LC1,Jooke,2025-04-28 00:00:00,TW1,China,Normal,1,Lain-lain
+TW-MPP-00315,Mesin Tamplate  JKC-NS2-13095-LM-LC1,Jooke,2025-04-28 00:00:00,TW38,China,Normal,1,Lain-lain
+TW-MPP-00473,Mesin Lubang QQ RH-982A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,Lain-lain
+TW-MPP-00474,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00475,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00476,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00518,Mesin Obras MO-6816S JUKI,JUKI,2025-03-14 00:00:00,TW38,Jepang,Normal,1,OL 3
+TW-MPP-00778,Mesin Obras MO-6800 JUKI,JUKI,2016-01-16 00:00:00,TW1,Jepang,Normal,1,OL 3
+TW-MPP-00479,Mesin Jarum 2 T-8450C-003,Brother,2020-07-01 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00498,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00499,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00500,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00508,Mesin Tamplate JKC-NS2-13095-LM-XH,Jooke,2025-08-13 00:00:00,TW38,China,Normal,1,Lain-lain
+TW-MPP-00509,Meja Gosok Nissin,Nissin,2025-07-03 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00510,Meja Gosok Nissin,Nissin,2025-07-03 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00526,Mesin Obras MO-6816D JUKI,JUKI,2016-01-16 00:00:00,TW38,Jepang,Normal,1,OL 3
+TW-MPP-00531,Mesin Obras MO-6800s JUKI,JUKI,2018-08-16 00:00:00,TW38,Jepang,Normal,1,OL 3
+TW-MPP-00545,Mesin Bobok Kantong  APW-895N,JUKI,2025-09-27 00:00:00,TW38,Jepang,Normal,1,APW
+TW-MPP-00550,Mesin Obras MO-6800s JUKI,JUKI,,TW38,Jepang,Normal,1,OL 3
+TW-MPP-00588,Mesin Obras MO-6816S JUKI,JUKI,2022-07-18 00:00:00,TW38,Jepang,Normal,1,OL 3
+TW-MPP-00594,Mesin Obras MO-6816S JUKI,JUKI,2023-04-06 00:00:00,TW1,Jepang,Normal,1,OL 3
+TW-MPP-00470,Auto Cut J-wei CB03II-2516-RQ/Projectors,J-Wei,2025-06-13 00:00:00,TW38,Taiwan,Normal,1,Manual
+TW-MPP-00478,Mesin Ban Karet (Kansai Plaket) DFB1404PMD,Kansai sp,2017-12-02 00:00:00,TW38,Jepang,Normal,1,"Kansai 7/8""+Cr"
+TW-MPP-00334,"Stabilizer Digital 30 KVA AVR - LD 22,5 GT",Matsuyama,2025-05-06 00:00:00,TW38,Jepang,Normal,1,Helper
+TW-MPP-00113,Meja Gosok Megochi,megochi,2019-09-18 00:00:00,TW1,China,Normal,1,Ironning
+TW-MPP-00527,Meja Gosok Megochi,megochi,,TW1,China,Normal,1,Ironning
+TW-MPP-00529,Meja Gosok Megochi,megochi,2019-02-04 00:00:00,TW1,China,Normal,1,Ironning
+TW-MPP-00530,Meja Gosok Megochi,megochi,,TIDAK DITEMUKAN,China,Normal,1,Ironning
+TW-MPP-00532,Meja Gosok Megochi,megochi,,TW1,China,Normal,1,Ironning
+TW-MPP-00533,Meja Gosok Megochi,megochi,,TIDAK DITEMUKAN,China,Rusak,1,Ironning
+TW-MPP-00534,Meja Gosok Megochi,megochi,,TIDAK DITEMUKAN,China,Rusak,1,Ironning
+TW-MPP-00593,Meja Gosok Megochi,megochi,2019-02-04 00:00:00,TW1,China,Normal,1,Ironning
+TW-MPP-00140,BOILER LISTRIK,Nissin,2020-04-06 00:00:00,TW1,Jepang,Normal,1,Helper
+TW-MPP-00536,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00537,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00538,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00539,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00540,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW1,China,Normal,1,Ironning
+TW-MPP-00541,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00542,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00336,Mesin Pisau Lempar potong Gelaran NS-980D,Nissin,2025-03-14 00:00:00,TW38,Jepang,Normal,1,Manual
+TW-MPP-00337,Mesin Pisau Lempar potong Gelaran NS-980D,Nissin,2025-03-14 00:00:00,TW38,Jepang,Normal,1,Manual
+TW-MPP-00546,Mesin Obras MO-6816D JUKI,Juki,2025-03-14 00:00:00,TW1,China,Normal,1,OL 3
+TW-MPP-00547,Mesin Obras MO-6816D JUKI,Juki,2025-03-14 00:00:00,TW1,China,Normal,1,OL 3
+TW-MPP-00549,Mesin Jarum 1 (DDL-900B),Juki,2018-09-27 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00338,Mesin Band Knife NS-BK900B,Nissin,2025-03-14 00:00:00,TW1,Jepang,Normal,1,Manual
+TW-MPP-00551,Mesin Jarum 1 (DDL-900B),Juki,2016-01-01 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00552,Mesin Obras MO-6816D JUKI,Juki,2023-04-06 00:00:00,TW1,China,Normal,1,OL 3
+TW-MPP-00553,Mesin Obras MO-6816D JUKI,Juki,2023-04-06 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00555,Mesin Obras MO-6816D JUKI,Juki,2023-04-06 00:00:00,TW1,China,Normal,1,OL 3
+TW-MPP-00556,Mesin Jarum 1  S7180A,Brother,2023-04-05 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00557,Mesin Jarum 1 (DDL-900B),Juki,2019-02-02 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00558,Mesin Bass  JOOKE,Jooke,2023-10-26 00:00:00,TW1,China,Normal,1,Bass
+TW-MPP-00421,Meja Gosok Nissin,Nissin,2024-12-04 00:00:00,TW38,Jepang,Normal,1,Ironning
+TW-MPP-00560,Mesin Obras MO-6800 JUKI,Juki,2018-08-07 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00561,Mesin Jarum 1  S7180A,Brother,2022-06-07 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00563,Mesin Jarum 1 S7100A,Brother,2020-07-13 00:00:00,TW38,Vietnam,Normal,1,SN
+TW-MPP-00422,Meja Gosok Nissin,Nissin,2024-12-04 00:00:00,TW38,Jepang,Normal,1,Ironning
+TW-MPP-00423,Meja Gosok Nissin,Nissin,2024-12-04 00:00:00,TW38,Jepang,Normal,1,Ironning
+TW-MPP-00438,Mesin Blind Stitch NS-160-20 ,Nissin,2025-05-14 00:00:00,TW38,Jepang,Normal,1,Blind Tack
+TW-MPP-00599,Meja Gosok Nissin,Nissin,2025-07-03 00:00:00,TW38,Jepang,Normal,1,Ironning
+TW-MPP-00522,MESIN HEAT PRESS ROLL,Phoenix,,TW38,Germany,Normal,1,Maica
+TW-MPP-00516,KOMPRESOR 15hp,Shark,2023-01-11 00:00:00,TW1,Indonesia,Normal,1,Helper
+TW-MPP-00032,KAPASITOR BANK,Shizuki,2019-07-03 00:00:00,TW1,Jepang,Normal,1,Helper
+TW-MPP-00087,MESIN Ban Karet SIRUBA,Siruba,2016-07-03 00:00:00,TW1,Taiwan,Normal,1,"Kansai 7/8""+Cr"
+TW-MPP-00519,GENSET 300KVA,Suntek,2023-01-03 00:00:00,TW38,china,Normal,1,Helper
+TW-MPP-00589,Mesin Jarum 1  S7180A,Brother,2023-04-05 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00592,Mesin Obras MO-6816D JUKI,Juki,2025-03-14 00:00:00,TW1,China,Normal,1,OL 3
+TW-MPP-00117,Meja Gosok Suesei,Susei,2020-03-01 00:00:00,TW38,Jepang,Normal,1,Ironning
+TW-MPP-00123,KOMPRESOR 10HP,Swan,2016-03-01 00:00:00,TW1,Taiwan,Normal,1,Helper
+TW-MPP-00520,KOMPRESOR 10HP,Swan,2023-01-01 00:00:00,TW38,Taiwan,Normal,1,Helper
+TW-MPP-00521,KOMPRESOR 5HP,Swan,2016-03-01 00:00:00,TW38,Taiwan,Normal,1,Helper
+TW-MPP-00513,Mesin Obras GN-795,Typical,2009-04-01 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00601,Mesin Khusus Lipatan Heming Bedoly,Bedoly,2024-03-28 00:00:00,TW38,China,Normal,1,Overdeck
+TW-MPP-00602,Mesin Obras Benang 5 HIKARI,Hikari,2024-03-28 00:00:00,TW1,China,Normal,1,OL 4 + Cr
+TW-MPP-00603,Mesin Side CutterH99S,Hikari,2024-03-28 00:00:00,TW1,China,Normal,1,SC
+TW-MPP-00722,Mesin Bobok kantong APW-895N,Juki,2023-04-05 00:00:00,TW1,China,Normal,1,APW
+TW-MPP-00607,Mesin Soom JC 9330-0,Brother,2024-05-29 00:00:00,TW1,China,Normal,1,Soom
+TW-MPP-00608,Mesin Potong Mika & Carton FT1512,Sinajet,2024-05-29 00:00:00,TW38,China,Normal,1,Manual
+TW-MPP-00609,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00610,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00612,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,china,Normal,1,SN
+TW-MPP-00613,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00614,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00615,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00616,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00617,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00618,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00619,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00620,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00621,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00622,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00623,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW1,China,Normal,1,SN
+TW-MPP-00624,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00625,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00626,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00597,Mesin ObrasGN-795,Typical,2009-04-01 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00629,Mesin Press NS-450MS,Nissin,2024-12-04 00:00:00,TW38,China,Normal,1,Maica
+TW-MPP-00630,Auto Cut J-wei CB03II-2516-RQ,J-Wei,2024-12-24 00:00:00,TW38,China,Normal,1,Manual
+TW-MPP-00631,Auto Cut J-wei CB03II-2516-RQ/Projectors,J-Wei,2024-12-24 00:00:00,TW38,China,Normal,1,Manual
+TW-MPP-00632,Bobok Laser Jooke JKT-3520-FA-HQ,Jooke,2024-12-04 00:00:00,TW38,China,Normal,1,Lain-lain
+TW-MPP-00633,Mesin Tamplate JKC-NS2-13095-LM-XH,Jooke,2024-12-04 00:00:00,TW38,China,Normal,1,Lain-lain
+TW-MPP-00634,Mesin Band Knife-BK900B,Nissin,2024-12-04 00:00:00,TW38,China,Normal,1,Manual
+TW-MPP-00543,Mesin Autocutt Yuanyi ,Yuanyi,2025-04-19 00:00:00,TW38,China,Normal,1,Manual
+TW-MPP-00636,Mesin Lubang Kancing  HE-800C-2,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,Button Holer
+TW-MPP-00637,Mesin Bartack Brother KE-430HS-03,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,Bartack
+TW-MPP-00638,Mesin Pasang Kancing Brother BE-438HS,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,Pasang Kancing
+TW-MPP-00639,Mesin Bartack Brother KE-430HS-03,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,Bartack
+TW-MPP-00640,Mesin Jarum 2 Brother T-8450C-003,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00641,Mesin Jarum 2 Brother T-8450C-003,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00642,Mesin Jarum 2 Brother T-8450C-003,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00643,Mesin Ban Karet (Kansai Plaket) DFB1404PMD,Kansai sp,2024-12-30 00:00:00,TW38,Jepang,Normal,1,"Kansai 7/8""+Cr"
+TW-MPP-00644,Mesin Ban Karet (Kansai Plaket) DFB1404PMD,Kansai sp,2024-12-30 00:00:00,TW1,Jepang,Normal,1,"Kansai 7/8""+Cr"
+TW-MPP-00645,Mesin Ban Karet (Kansai Plaket) DFB1404PMD,Kansai sp,2024-12-30 00:00:00,TW38,Jepang,Normal,1,"Kansai 7/8""+Cr"
+TW-MPP-00646,Mesin Jarum 2 Brother T-8450C-003,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00647,Mesin Lubang Kancing HE-800C-2,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,Button Holer
+TW-MPP-00648,Mesin Pasang Kancing Brother BE-438HS,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,Pasang Kancing
+TW-MPP-00574,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00650,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00506,Mesin Gurinda duduk,domax,2025-08-07 00:00:00,TW1,China,Normal,1,Lain-lain
+TW-MPP-00652,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00653,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00654,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00655,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00656,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00657,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00658,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00659,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00660,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00661,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00662,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00663,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00664,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00665,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00666,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00667,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00668,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00669,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00670,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00671,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00673,Mesin Jarum 1 S7180A,Brother,2024-12-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00674,Boiler Gas EH 500KH,,2024-11-20 00:00:00,TW38,China,Normal,1,Helper
+TW-MPP-00688,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00689,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW1,China,Normal,1,Ironning
+TW-MPP-00690,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00691,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00692,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00693,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00694,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00695,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00696,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00697,Meja Gosok Nissin,Nissin,2025-04-09 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00698,Meja Gosok Nissin,Nissin,2024-12-04 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00699,Meja Gosok Nissin,Nissin,2024-12-04 00:00:00,TW38,China,Normal,1,Ironning
+TW-MPP-00700,Mesin Jarum 1  S7180A,Brother,2024-08-30 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00702,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00712,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00713,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00714,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00715,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00716,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00717,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00718,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00719,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00720,ALAT PASANG BENANG,JING JIU JIANG,2025-02-05 00:00:00,TW38,China,Normal,1,Threader
+TW-MPP-00794,Mesin jarum 1 S7100a,Brother,,TW1,Vietnam,Normal,1,SN
+TW-MPP-00721,Alat Pindah barang,-,2026-03-16 00:00:00,TW38,China,Normal,1,Helper
+TW-MPP-00497,SMART PULLER LM-DGS,LUMINO,2026-04-29 00:00:00,TW38,CHINA,Normal,1,Helper
+TW-MPP-00596,SMART PULLER LM-DGS,LUMINO,2026-04-29 00:00:00,TW38,China,Normal,1,Helper
+TW-MPP-00495,SMART PULLER LM-DGS,LUMINO,2026-04-29 00:00:00,TW38,CHINA,Normal,1,Helper
+TW-MPP-00494,SMART PULLER LM-DGS,LUMINO,2026-04-29 00:00:00,TW38,CHINA,Normal,1,Helper
+TW-MPP-00493,SMART PULLER LM-DGS,LUMINO,2026-04-29 00:00:00,TW38,CHINA,Normal,1,Helper
+TW-MPP-00492,SMART PULLER LM-DGS,LUMINO,2026-04-29 00:00:00,TW38,China,Normal,1,Helper
+TW-MPP-00491,SMART PULLER LM-DGS,LUMINO,2026-04-29 00:00:00,TW38,CHINA,Normal,1,Helper
+TW-MPP-00490,SMART PULLER LM-DGS,LUMINO,2026-04-29 00:00:00,TW38,CHINA,Normal,1,Helper
+TW-MPP-00489,SMART PULLER LM-DGS,LUMINO,2026-04-29 00:00:00,TW38,CHINA,Normal,1,Helper
+TW-MPP-00480,Mesin Pasang Tangan,Durkop Adler,2025-05-08 00:00:00,TW38,german,Normal,1,Lain-lain
+TW-MPP-00571,Mesin Pasang Tangan,Durkop Adler,2025-12-01 00:00:00,TW1,German,Normal,1,Lain-lain
+-,UMUM,,,--,,,1,Manual
+TW-MPP-00481,Mesin obras HX8VII-16-03C,Hikari,2026-04-29 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00482,Mesin obras HX8VII-16-03C,Hikari,2026-04-29 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00485,Mesin obras HX8VII-16-03C,Hikari,2026-04-29 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00488,Mesin obras HX8VII-16-03C,Hikari,2026-04-29 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00487,Mesin obras HX8VII-16-03C,Hikari,2026-04-29 00:00:00,TW38,China,Normal,1,OL 3
+TW-MPP-00484,Mesin Cuci Sharp ES-M8000P,SHARP,2025-07-22 00:00:00,TW38,,Normal,1,Helper
+TW-MPP-00451,Mesin Jarum 1 S7180A,Brother,2025-07-03 00:00:00,TW38,China,Normal,1,SN
+TW-MPP-00732,Mesin Press NS-450MS,Nissin,2025-11-03 00:00:00,TW38,China,Normal,1,Maica
+TW-MPP-00,Mesin Printing Sublime TS-100 1600,MIMAKI,2023-05-05 00:00:00,TW38,China,Normal,1,Helper
+,Puller Carv ATM,CARV,2021-01-16 00:00:00,--,,Rusak,1,Helper
+,Boiler Kompor gas,,2010-05-01 00:00:00,--,,Normal,1,Helper
+,Spreading Vacum Table cutting,,2019-04-01 00:00:00,--,Indonesia,Normal,1,Manual
+,Spreading Vacum Table cutting,,2019-04-01 00:00:00,--,Indonesia,Normal,1,Manual
+,Spreading Vacum Table cutting,,2019-04-01 00:00:00,--,Indonesia,Normal,1,Manual
+TW-MPP-00462,Mesin KM KS-AUV,MACK,,TW38,CHINA,Normal,1,Lain-lain
+TW-MPP-00580,Mesin Pisau Lempar potong Gelaran NS-980D,Nissin,2025-03-14 00:00:00,TW38,CHINA,Normal,1,Manual
+TW-MPP-00313,Mesin Pocket Setter M,Maica,2023-09-22 00:00:00,TW1,china,Normal,1,Pocket Setter
+,,,,TW38,,,1,Lain-lain
+TW-MPP-00781,Mesin Ban Karet (Kansai Plaket) DFB1404PMD,KANSAI,,TW38,JEPANG,Normal,1,"Kansai 7/8""+Cr"
+TW-MPP-00773,Mesin Pisau Lempar potong Gelaran NS-980D,NISSIN,,TW1,JEPANG,Normal,1,Manual
+TW-MPP-00774,Mesin Pisau Lempar potong Gelaran NS-980D,Nissin,,TW1,China,Normal,1,Manual
+TW-MPP-00054,Automatic AC Voltage Regulator,MATSUYAMA,,TW1,CHINA,Normal,1,Helper
+,,,,,,Terjual,1,Lain-lain
+TW-MPP-00780,MESIN SNAP F-STRONG BENHO,BENHO,,TW1,CHINA,Rusak,1,Snap Attaching
+TW-MPP-00118,Mesin Cuci Aquamagic,Sharp,,TW1,China,Normal,1,Helper
