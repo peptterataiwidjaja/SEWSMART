@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
 import { GoogleGenAI } from "@google/genai";
@@ -7,7 +8,7 @@ import { GoogleGenAI } from "@google/genai";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
 
 app.use(express.json({ limit: "10mb" }));
 
@@ -210,14 +211,20 @@ Buatlah dalam format Markdown yang rapi dan mudah dibaca supervisor di lantai pr
 
 // Setup Vite dev server or serve production build
 async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
+  const distPath = path.join(process.cwd(), "dist");
+  const isProduction =
+    process.env.NODE_ENV === "production" ||
+    Boolean(process.env.K_SERVICE) ||
+    (process.env.NODE_ENV !== "development" &&
+      (Boolean(process.env.PORT) || fs.existsSync(path.join(distPath, "index.html"))));
+
+  if (!isProduction) {
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (_req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
@@ -225,7 +232,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Express + Vite server is running on http://0.0.0.0:${PORT}`);
+    console.log(`Server is running on http://0.0.0.0:${PORT} (mode: ${isProduction ? "production" : "development"})`);
   });
 }
 
