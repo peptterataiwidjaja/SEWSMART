@@ -7,6 +7,23 @@ export type LineNumber = 1 | 3 | 4 | 5 | 6 | 7;
 
 export type UserRole = "production_engineer" | "admin_line";
 
+export type NavTabId =
+  | "hourly"
+  | "attendance"
+  | "excel"
+  | "layout"
+  | "inventory"
+  | "daily"
+  | "pe-dashboard"
+  | "account-access";
+
+export interface NavBarConfig {
+  id: NavTabId;
+  label: string;
+  defaultLabel: string;
+  peOnly?: boolean;
+}
+
 export type AttendanceStatus = "HADIR" | "IZIN" | "SAKIT" | "CUTI" | "ALPHA";
 
 export type OperatorGrade = "A" | "B" | "C" | "D";
@@ -20,6 +37,7 @@ export interface User {
   title: string;
   password?: string;
   lastLogin?: string;
+  allowedTabs?: NavTabId[];
 }
 
 export type GarmentProductType =

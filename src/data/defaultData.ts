@@ -9,6 +9,8 @@ import {
   FiveWhyItem,
   EngineeringRecommendation,
   GarmentProductType,
+  NavBarConfig,
+  NavTabId,
 } from "../types";
 import { calculateProductBasedGrading } from "../utils/grading";
 import { isPlottableSewingProcess } from "../utils/excelParser";
@@ -220,13 +222,13 @@ export function generateLineProductionRows(
     const isPresent = assignedOp?.attendanceStatus === "HADIR";
 
     const workingMinutes = workingHours * 60;
-    // Bersihkan semua input: default ke 0 (kosong)
-    const hourlyActual: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    const hourlyDefects: number[] = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    // Bersihkan semua input: default ke 0 (8 jam kerja)
+    const hourlyActual: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
+    const hourlyDefects: number[] = [0, 0, 0, 0, 0, 0, 0, 0];
 
     const totalActual = 0;
     const totalDefects = 0;
-    const target = targetPerDay;
+    const target = targetPerHour;
     const balanceTarget = 0;
     const akmOutput = 0;
     const akmStock = 0;
@@ -237,6 +239,9 @@ export function generateLineProductionRows(
     if (!isPresent) {
       status = "unassigned";
       keterangan = `Operator ${assignedOp?.name || ""} (${assignedOp?.attendanceStatus || "Absen"}) - Butuh Double Job`;
+    } else if (proc.cycleTime >= 85 || proc.smv >= 1.4) {
+      status = "bottleneck";
+      keterangan = `Bottleneck Siklus (${proc.cycleTime}d / SMV ${proc.smv}) - Butuh Tandem`;
     }
 
     return {
@@ -260,6 +265,8 @@ export function generateLineProductionRows(
       totalDefects,
       keterangan,
       status,
+      cycleTime: proc.cycleTime,
+      smv: proc.smv,
     };
   });
 
@@ -279,75 +286,47 @@ export function generateLineProductionRows(
   };
 }
 
+export const DEFAULT_NAV_BARS: NavBarConfig[] = [
+  { id: "hourly", label: "Kontrol Jam", defaultLabel: "Kontrol Jam" },
+  { id: "attendance", label: "Presensi", defaultLabel: "Presensi" },
+  { id: "excel", label: "Breakdown", defaultLabel: "Breakdown" },
+  { id: "layout", label: "Layout", defaultLabel: "Layout" },
+  { id: "inventory", label: "Stok Mesin", defaultLabel: "Stok Mesin" },
+  { id: "daily", label: "Laporan", defaultLabel: "Laporan" },
+  { id: "pe-dashboard", label: "Dasbor PE", defaultLabel: "Dasbor PE" },
+  { id: "account-access", label: "Akses Akun", defaultLabel: "Akses Akun", peOnly: true },
+];
+
+export const ALL_PE_TABS: NavTabId[] = [
+  "hourly",
+  "attendance",
+  "excel",
+  "layout",
+  "inventory",
+  "daily",
+  "pe-dashboard",
+  "account-access",
+];
+
+export const DEFAULT_ADMIN_LINE_TABS: NavTabId[] = [
+  "hourly",
+  "attendance",
+  "excel",
+  "layout",
+  "inventory",
+  "daily",
+];
+
 export const DEFAULT_USERS: User[] = [
   {
     id: "user-pe",
-    username: "pe_head",
+    username: "PE",
     password: "pe123",
     name: "Ir. Budi Santoso (PE Head)",
     role: "production_engineer",
-    title: "Production Engineer Head (Akses Penuh Semua Line & Master BP)",
-    lastLogin: "2026-09-13 07:45",
-  },
-  {
-    id: "user-l1",
-    username: "admin_l1",
-    password: "line1pass",
-    name: "Rina S. (Admin Line 1)",
-    role: "admin_line",
-    assignedLine: 1,
-    title: "Admin Sewing Line 1 (SOGO EXPORT)",
-    lastLogin: "2026-09-13 08:00",
-  },
-  {
-    id: "user-l3",
-    username: "admin_l3",
-    password: "line3pass",
-    name: "Dewi P. (Admin Line 3)",
-    role: "admin_line",
-    assignedLine: 3,
-    title: "Admin Sewing Line 3 (UNIQLO CASUAL)",
-    lastLogin: "2026-09-13 08:05",
-  },
-  {
-    id: "user-l4",
-    username: "admin_l4",
-    password: "line4pass",
-    name: "Agus T. (Admin Line 4)",
-    role: "admin_line",
-    assignedLine: 4,
-    title: "Admin Sewing Line 4 (ZARA WOMAN)",
-    lastLogin: "2026-09-13 07:55",
-  },
-  {
-    id: "user-l5",
-    username: "admin_l5",
-    password: "line5pass",
-    name: "Fitri W. (Admin Line 5)",
-    role: "admin_line",
-    assignedLine: 5,
-    title: "Admin Sewing Line 5 (H&M BASIC)",
-    lastLogin: "2026-09-13 08:10",
-  },
-  {
-    id: "user-l6",
-    username: "admin_l6",
-    password: "line6pass",
-    name: "Hendra K. (Admin Line 6)",
-    role: "admin_line",
-    assignedLine: 6,
-    title: "Admin Sewing Line 6 (MARKS & SPENCER)",
-    lastLogin: "2026-09-13 08:00",
-  },
-  {
-    id: "user-l7",
-    username: "admin_l7",
-    password: "line7pass",
-    name: "Siti Nur (Admin Line 7)",
-    role: "admin_line",
-    assignedLine: 7,
-    title: "Admin Sewing Line 7 (ADIDAS SPORTS)",
-    lastLogin: "2026-09-13 08:12",
+    title: "Production Engineer (Akses Penuh)",
+    lastLogin: "2026-09-26 08:00",
+    allowedTabs: ALL_PE_TABS,
   },
 ];
 

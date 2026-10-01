@@ -40,6 +40,8 @@ import {
   DailyReportLog,
   GoogleScriptConfig,
   GoogleScriptSyncLog,
+  NavTabId,
+  NavBarConfig,
 } from "./types";
 import {
   DEFAULT_STYLE_METADATA,
@@ -47,6 +49,9 @@ import {
   INITIAL_OPERATORS,
   VALID_LINES,
   DEFAULT_USERS,
+  DEFAULT_NAV_BARS,
+  ALL_PE_TABS,
+  DEFAULT_ADMIN_LINE_TABS,
   generateInitialLineRows,
 } from "./data/defaultData";
 import { DEFAULT_LINES_BP, INITIAL_SEPTEMBER_2026_LOGS } from "./data/lineBPData";
@@ -74,18 +79,26 @@ import { LoginModal } from "./components/LoginModal";
 import { GoogleScriptModal } from "./components/GoogleScriptModal";
 import { LoginScreen } from "./components/LoginScreen";
 import { SimpleBWPrintModal } from "./components/SimpleBWPrintModal";
+import { AccountAccessManager } from "./components/AccountAccessManager";
 
 export default function App() {
   // Navigation & Line Selection
-  const [activeTab, setActiveTab] = useState<
-    "hourly" | "attendance" | "excel" | "layout" | "inventory" | "pe-dashboard" | "daily"
-  >("hourly");
+  const [activeTab, setActiveTab] = useState<NavTabId>("hourly");
   const [selectedLine, setSelectedLine] = useState<LineNumber>(1);
 
-  // RBAC User Authentication State
+  // Navigation Bars Configuration (Renamable by PE)
+  const [navBars, setNavBars] = useState<NavBarConfig[]>(() => {
+    try {
+      const saved = localStorage.getItem("sewsmart_nav_bars_v5");
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return DEFAULT_NAV_BARS;
+  });
+
+  // RBAC User Authentication State (Initially only PE with pass pe123)
   const [users, setUsers] = useState<User[]>(() => {
     try {
-      const saved = localStorage.getItem("sewsmart_users_v4");
+      const saved = localStorage.getItem("sewsmart_users_v5");
       if (saved) return JSON.parse(saved);
     } catch (e) {}
     return DEFAULT_USERS;
@@ -93,7 +106,7 @@ export default function App() {
 
   const [currentUser, setCurrentUser] = useState<User>(() => {
     try {
-      const savedUser = localStorage.getItem("sewsmart_current_user_v4");
+      const savedUser = localStorage.getItem("sewsmart_current_user_v5");
       if (savedUser) return JSON.parse(savedUser);
     } catch (e) {}
     return DEFAULT_USERS[0]; // Default: Production Engineer
@@ -102,30 +115,52 @@ export default function App() {
   // Dedicated Login Screen State
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     try {
-      return localStorage.getItem("sewsmart_auth_status_v4") === "true";
+      return localStorage.getItem("sewsmart_auth_status_v5") === "true";
     } catch (e) {
       return false;
     }
   });
 
   const handleLogin = (user: User) => {
-    setCurrentUser(user);
+    const nowStr = new Date().toISOString().replace("T", " ").substring(0, 16);
+    const loggedInUser: User = { ...user, lastLogin: nowStr };
+
+    setCurrentUser(loggedInUser);
+    setUsers((prev) => {
+      const next = prev.map((u) => (u.id === user.id ? loggedInUser : u));
+      try {
+        localStorage.setItem("sewsmart_users_v5", JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
     setIsAuthenticated(true);
     try {
-      localStorage.setItem("sewsmart_auth_status_v4", "true");
-      localStorage.setItem("sewsmart_current_user_v4", JSON.stringify(user));
+      localStorage.setItem("sewsmart_auth_status_v5", "true");
+      localStorage.setItem("sewsmart_current_user_v5", JSON.stringify(loggedInUser));
     } catch (e) {}
 
     // Auto-navigate to assigned line for Admin Line
     if (user.role === "admin_line" && user.assignedLine) {
       setSelectedLine(user.assignedLine as LineNumber);
     }
+
+    // Ensure activeTab is in user's allowedTabs
+    const userTabs =
+      user.allowedTabs && user.allowedTabs.length > 0
+        ? user.allowedTabs
+        : user.role === "production_engineer"
+        ? ALL_PE_TABS
+        : DEFAULT_ADMIN_LINE_TABS;
+
+    if (!userTabs.includes(activeTab) || (activeTab === "account-access" && user.role !== "production_engineer")) {
+      setActiveTab(userTabs[0] || "hourly");
+    }
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     try {
-      localStorage.removeItem("sewsmart_auth_status_v4");
+      localStorage.removeItem("sewsmart_auth_status_v5");
     } catch (e) {}
   };
 
@@ -230,6 +265,9 @@ export default function App() {
   const [isPrintReportOpen, setIsPrintReportOpen] = useState(false);
   const [isSimpleBWPrintOpen, setIsSimpleBWPrintOpen] = useState(false);
   const [isGoogleScriptModalOpen, setIsGoogleScriptModalOpen] = useState(false);
+
+  // PE-controlled Alarm Cancellation State per Line (Only PE can cancel from PE Dashboard)
+  const [cancelledAlarmLines, setCancelledAlarmLines] = useState<Record<number, boolean>>({});
 
   // Google Apps Script & Google Spreadsheet Integration State
   const [googleScriptConfig, setGoogleScriptConfig] = useState<GoogleScriptConfig>(() => {
@@ -343,35 +381,89 @@ export default function App() {
     locationUsage.usedByCoLocatedLines,
   ]);
 
-  // Handlers for RBAC user changes
-  const handleUpdateUserName = (userId: string, newName: string) => {
-    setUsers((prev) => {
-      const updated = prev.map((u) => (u.id === userId ? { ...u, name: newName } : u));
-      try {
-        localStorage.setItem("sewsmart_users_v4", JSON.stringify(updated));
-      } catch (e) {}
-      return updated;
-    });
-
-    if (currentUser.id === userId) {
-      setCurrentUser((prev) => {
-        const updated = { ...prev, name: newName };
+  // Handlers for RBAC user & bar changes (PE Account Access Management)
+  const syncUserWithLineData = (user: User) => {
+    if (user.role === "admin_line" && user.assignedLine) {
+      const lineId = user.assignedLine;
+      setLinesBP((prev) => {
+        const currentBP = prev[lineId];
+        if (!currentBP) return prev;
+        const next = {
+          ...prev,
+          [lineId]: {
+            ...currentBP,
+            uploadedBy: user.name,
+          },
+        };
         try {
-          localStorage.setItem("sewsmart_current_user_v4", JSON.stringify(updated));
+          localStorage.setItem("sewsmart_lines_bp_v4", JSON.stringify(next));
         } catch (e) {}
-        return updated;
+        return next;
       });
     }
   };
 
-  const handleSwitchUser = (user: User) => {
-    setCurrentUser(user);
-    try {
-      localStorage.setItem("sewsmart_current_user_v4", JSON.stringify(user));
-    } catch (e) {}
-    if (user.role === "admin_line" && user.assignedLine) {
-      setSelectedLine(user.assignedLine);
+  const handleAddUser = (newUser: User) => {
+    setUsers((prev) => {
+      const updated = [...prev, newUser];
+      try {
+        localStorage.setItem("sewsmart_users_v5", JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+    syncUserWithLineData(newUser);
+  };
+
+  const handleUpdateUser = (updatedUser: User) => {
+    setUsers((prev) => {
+      const updated = prev.map((u) => (u.id === updatedUser.id ? updatedUser : u));
+      try {
+        localStorage.setItem("sewsmart_users_v5", JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+
+    if (currentUser.id === updatedUser.id) {
+      setCurrentUser(updatedUser);
+      try {
+        localStorage.setItem("sewsmart_current_user_v5", JSON.stringify(updatedUser));
+      } catch (e) {}
     }
+
+    syncUserWithLineData(updatedUser);
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    setUsers((prev) => {
+      const target = prev.find((u) => u.id === userId);
+      const peUsers = prev.filter((u) => u.role === "production_engineer");
+      if (target?.role === "production_engineer" && peUsers.length <= 1) {
+        return prev; // Keep at least 1 PE account
+      }
+      const updated = prev.filter((u) => u.id !== userId);
+      try {
+        localStorage.setItem("sewsmart_users_v5", JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
+  };
+
+  const handleUpdateNavBars = (newBars: NavBarConfig[]) => {
+    setNavBars(newBars);
+    try {
+      localStorage.setItem("sewsmart_nav_bars_v5", JSON.stringify(newBars));
+    } catch (e) {}
+  };
+
+  const handleUpdateUserName = (userId: string, newName: string) => {
+    const target = users.find((u) => u.id === userId);
+    if (target) {
+      handleUpdateUser({ ...target, name: newName });
+    }
+  };
+
+  const handleSwitchUser = (user: User) => {
+    handleLogin(user);
   };
 
   // UPLOAD LINE BP HANDLER (Admin Line or PE)
@@ -697,17 +789,66 @@ export default function App() {
 
       const updatedRows = lineObj.rows.map((row) => {
         if (row.no === processNo) {
-          const updatedHourlyActual = [...row.hourlyActual];
-          const updatedHourlyDefects = [...row.hourlyDefects];
+          const updatedHourlyActual = [...row.hourlyActual.slice(0, 8)];
+          while (updatedHourlyActual.length < 8) updatedHourlyActual.push(0);
+          const updatedHourlyDefects = [...row.hourlyDefects.slice(0, 8)];
+          while (updatedHourlyDefects.length < 8) updatedHourlyDefects.push(0);
 
-          updatedHourlyActual[hourIndex] = newActual;
-          updatedHourlyDefects[hourIndex] = newDefect;
+          const safeActual = Number((Number(newActual) || 0).toFixed(2));
+          const safeDefect = Number((Number(newDefect) || 0).toFixed(2));
+          updatedHourlyActual[hourIndex] = safeActual;
+          updatedHourlyDefects[hourIndex] = safeDefect;
 
           // STRICTLY sum of Jam 1 through Jam 8
-          const totalActual = updatedHourlyActual.slice(0, 8).reduce((a, b) => a + (Number(b) || 0), 0);
+          const totalActual = Number(
+            updatedHourlyActual
+              .slice(0, 8)
+              .reduce((a, b) => a + (Number(b) || 0), 0)
+              .toFixed(2)
+          );
           // Preserve manual defect count on row
-          const totalDefects = typeof row.totalDefects === "number" ? row.totalDefects : updatedHourlyDefects.reduce((a, b) => a + b, 0);
-          const balanceTarget = totalActual - row.target;
+          const totalDefects = Number(
+            (typeof row.totalDefects === "number"
+              ? row.totalDefects
+              : updatedHourlyDefects.reduce((a, b) => a + b, 0)
+            ).toFixed(2)
+          );
+          const balanceTarget = Number((totalActual - row.target).toFixed(2));
+
+          // Determine active filled hours to evaluate hourly bottleneck accurately from target per hour & SMV
+          const hourlyTarget = Number((row.targetPerHour || 10).toFixed(2));
+          const smv = Number((row.smv || 0.75).toFixed(2));
+          const kapasitasSmvPerJam = smv > 0 ? Number((60 / smv).toFixed(2)) : 0;
+          const filledHours = updatedHourlyActual.slice(0, 8).filter((v, idx) => v > 0 || (idx === hourIndex && safeActual > 0)).length;
+          const expectedCumulative = Number((filledHours * hourlyTarget).toFixed(2));
+          const isHourBelowTarget = safeActual > 0 && safeActual < hourlyTarget;
+          const isAnyActiveHourBelowTarget = updatedHourlyActual
+            .slice(0, effectiveWorkingHours)
+            .some((v) => Number(v) > 0 && Number(v) < hourlyTarget);
+          const isHighCycleBottleneck =
+            !row.isTandem &&
+            !row.isDoubleJob &&
+            (kapasitasSmvPerJam < hourlyTarget || (row.cycleTime || 0) >= 85 || smv >= 1.4) &&
+            newActual < hourlyTarget;
+
+          const isNowBottleneck =
+            isHourBelowTarget || isAnyActiveHourBelowTarget || isHighCycleBottleneck;
+
+          // Alarm hanya dipicu ulang apabila bottleneck terjadi pada Jam ke-3 (index 2) atau setelahnya
+          const hasJam3InputAfterUpdate =
+            (hourIndex >= 2 && newActual > 0) ||
+            updatedHourlyActual.slice(2, effectiveWorkingHours).some((v) => Number(v) > 0);
+          const isJam3Bottleneck =
+            hasJam3InputAfterUpdate &&
+            ((Number(updatedHourlyActual[2]) || 0) < hourlyTarget ||
+              (hourIndex >= 2 && isHourBelowTarget));
+
+          if (isJam3Bottleneck) {
+            setCancelledAlarmLines((prevAlarm) => ({
+              ...prevAlarm,
+              [selectedLine]: false,
+            }));
+          }
 
           return {
             ...row,
@@ -720,16 +861,14 @@ export default function App() {
             status:
               row.operatorAttendance !== "HADIR"
                 ? ("unassigned" as const)
-                : balanceTarget < -10
+                : isNowBottleneck
                 ? ("bottleneck" as const)
                 : ("normal" as const),
             keterangan:
               row.operatorAttendance !== "HADIR"
                 ? "Kritis: Operator Absen"
-                : balanceTarget < -10
-                ? "Bottleneck di stasiun ini"
-                : balanceTarget < 0
-                ? "Under target"
+                : isNowBottleneck
+                ? `Bottleneck: Aktual ${totalActual}/${expectedCumulative || hourlyTarget} pcs`
                 : "Tercapai normal",
           };
         }
@@ -752,13 +891,133 @@ export default function App() {
       const lineObj = prev[selectedLine];
       if (!lineObj) return prev;
 
-      const safeDefects = Math.max(0, Number(newDefects) || 0);
+      const safeDefects = Math.max(0, Number(Number(newDefects || 0).toFixed(2)));
 
       const updatedRows = lineObj.rows.map((row) => {
         if (row.no === processNo) {
           return {
             ...row,
             totalDefects: safeDefects,
+          };
+        }
+        return row;
+      });
+
+      return {
+        ...prev,
+        [selectedLine]: {
+          ...lineObj,
+          rows: updatedRows,
+        },
+      };
+    });
+  };
+
+  // UPDATE TARGET PER JAM OTOMATIS UNTUK SELURUH BARIS KONTROL JAM (DAN OPSIONAL ISI JAM AKTIF)
+  const handleUpdateLineTargetPerHour = (
+    newTargetPerHour: number,
+    autoFillActiveHours: boolean = false
+  ) => {
+    const safeTarget = Number(Math.max(0, Number(newTargetPerHour) || 0).toFixed(2));
+    const newDailyTarget = Number((safeTarget * effectiveWorkingHours).toFixed(2));
+
+    // 1. Update linesBP metadata for active line
+    setLinesBP((prev) => {
+      const bp = prev[selectedLine] || DEFAULT_LINES_BP[selectedLine] || DEFAULT_LINES_BP[1];
+      const next = {
+        ...prev,
+        [selectedLine]: {
+          ...bp,
+          metadata: {
+            ...bp.metadata,
+            lineTargetPerHour: safeTarget,
+            lineTargetPerDay: newDailyTarget,
+            targetPerManpowerPerDay: safeTarget,
+          },
+        },
+      };
+      try {
+        localStorage.setItem("sewsmart_lines_bp_v4", JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+
+    // 2. Update linesData rows automatically with the new target
+    setLinesData((prev) => {
+      const lineObj = prev[selectedLine];
+      if (!lineObj) return prev;
+
+      const updatedRows = lineObj.rows.map((row) => {
+        const isPresent = row.operatorAttendance === "HADIR" && row.status !== "unassigned";
+        const updatedHourlyActual = autoFillActiveHours
+          ? row.hourlyActual.slice(0, 8).map((v, idx) =>
+              idx < effectiveWorkingHours ? (isPresent ? safeTarget : 0) : v
+            )
+          : row.hourlyActual.slice(0, 8);
+
+        const totalActual = Number(
+          updatedHourlyActual.reduce((a, b) => a + (Number(b) || 0), 0).toFixed(2)
+        );
+        const balanceTarget = Number((totalActual - safeTarget).toFixed(2));
+
+        const smv = row.smv || 0.75;
+        const kapasitasSmvPerJam = smv > 0 ? 60 / smv : 0;
+        const isAnyHourBelow = updatedHourlyActual
+          .slice(0, effectiveWorkingHours)
+          .some((v) => Number(v) > 0 && Number(v) < safeTarget);
+        const isHighCycle =
+          !row.isTandem &&
+          !row.isDoubleJob &&
+          (kapasitasSmvPerJam < safeTarget || (row.cycleTime || 0) >= 85 || smv >= 1.4);
+
+        const isBottleneck = isAnyHourBelow || (isHighCycle && !autoFillActiveHours);
+
+        return {
+          ...row,
+          targetPerHour: safeTarget,
+          target: safeTarget,
+          hourlyActual: updatedHourlyActual,
+          totalActual,
+          akmOutput: totalActual,
+          balanceTarget,
+          status: !isPresent
+            ? ("unassigned" as const)
+            : isBottleneck
+            ? ("bottleneck" as const)
+            : ("normal" as const),
+        };
+      });
+
+      const next = {
+        ...prev,
+        [selectedLine]: {
+          ...lineObj,
+          targetPerHour: safeTarget,
+          targetPerDay: newDailyTarget,
+          rows: updatedRows,
+        },
+      };
+      try {
+        localStorage.setItem("sewsmart_lines_data_v4", JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  };
+
+  // UPDATE TARGET PER JAM UNTUK 1 BARIS STASIUN TERTENTU
+  const handleUpdateRowTargetPerHour = (processNo: number, newRowTarget: number) => {
+    const safeTarget = Number(Math.max(0, Number(newRowTarget) || 0).toFixed(2));
+    setLinesData((prev) => {
+      const lineObj = prev[selectedLine];
+      if (!lineObj) return prev;
+
+      const updatedRows = lineObj.rows.map((row) => {
+        if (row.no === processNo) {
+          return {
+            ...row,
+            targetPerHour: safeTarget,
+            target: safeTarget,
+            balanceTarget: Number((row.totalActual - safeTarget).toFixed(2)),
           };
         }
         return row;
@@ -902,11 +1161,24 @@ export default function App() {
 
       const updatedRows = lineObj.rows.map((row) => {
         if (row.no === stationNo) {
+          const hourlyTarget = row.targetPerHour || 10;
+          const normalizedActuals = row.hourlyActual.slice(0, 8).map((v) =>
+            v > 0 && v < hourlyTarget ? hourlyTarget : v
+          );
+          const totalActual = normalizedActuals.reduce((a, b) => a + (Number(b) || 0), 0);
+
           return {
             ...row,
-            operatorName: `${op1Name} & ${op2Name}`,
+            operatorName: row.operatorName.includes("&")
+              ? row.operatorName
+              : `${op1Name} & ${op2Name}`,
             isTandem: true,
-            cycleTime: Math.round(row.cycleTime / 2),
+            cycleTime: row.cycleTime ? Math.round(row.cycleTime / 2) : 40,
+            smv: row.smv ? Number((row.smv / 2).toFixed(2)) : 0.65,
+            hourlyActual: normalizedActuals,
+            totalActual,
+            akmOutput: totalActual,
+            balanceTarget: totalActual - row.target,
             status: "normal" as const,
             keterangan: "Tandem 2 Operator (Siklus dipangkas 50%)",
           };
@@ -948,6 +1220,135 @@ export default function App() {
   const presentCount = currentLineOperators.filter((o) => o.attendanceStatus === "HADIR").length;
   const totalOpsCount = currentLineOperators.length;
 
+  // Compute Real-Time Alarm & Kendala State across all lines for Kontrol Jam & PE Dashboard
+  const lineAlarmState = useMemo(() => {
+    const state: Record<
+      number,
+      { issueCount: number; stations: string[]; isCancelled: boolean }
+    > = {};
+
+    VALID_LINES.forEach((lineId) => {
+      const lData = linesData[lineId];
+      const bp = linesBP[lineId] || DEFAULT_LINES_BP[lineId] || DEFAULT_LINES_BP[1];
+      const allowancePct = bp.metadata.allowancePercentage || 15;
+      const lineTargetHr = bp.metadata.lineTargetPerHour || 10;
+
+      if (!lData) {
+        state[lineId] = { issueCount: 0, stations: [], isCancelled: !!cancelledAlarmLines[lineId] };
+        return;
+      }
+
+      let maxIdx = -1;
+      lData.rows.forEach((r) => {
+        r.hourlyActual.slice(0, effectiveWorkingHours).forEach((val, idx) => {
+          if ((Number(val) || 0) > 0 && idx > maxIdx) maxIdx = idx;
+        });
+      });
+
+      // Alarm hanya berbunyi ketika Jam ke-3 (index >= 2) sudah berjalan/diinput dan terjadi bottleneck pada Jam ke-3
+      if (maxIdx < 2) {
+        state[lineId] = {
+          issueCount: 0,
+          stations: [],
+          isCancelled: !!cancelledAlarmLines[lineId],
+        };
+        return;
+      }
+
+      const problemRows = lData.rows.filter((r) => {
+        const isAbsent = r.operatorAttendance !== "HADIR" || r.status === "unassigned";
+        const targetPerHr = r.targetPerHour || lineTargetHr;
+        const smv = r.smv || 0.75;
+        const sam = smv * (1 + allowancePct / 100);
+        const isSmvShort =
+          !r.isTandem &&
+          !r.isDoubleJob &&
+          (60 / smv < targetPerHr || 60 / sam < targetPerHr || (r.cycleTime || 0) >= 85 || smv >= 1.4);
+
+        const jam3Val = Number(r.hourlyActual[2]) || 0;
+        const isJam3BelowTarget = jam3Val < targetPerHr;
+        const hasHourFromJam3BelowTarget = r.hourlyActual
+          .slice(2, maxIdx + 1)
+          .some((val) => (Number(val) || 0) < targetPerHr);
+
+        return (
+          isJam3BelowTarget ||
+          hasHourFromJam3BelowTarget ||
+          ((isAbsent || isSmvShort || r.status === "bottleneck") && isJam3BelowTarget)
+        );
+      });
+
+      state[lineId] = {
+        issueCount: problemRows.length,
+        stations: problemRows.map((r) => `#${r.no} ${r.process}`),
+        isCancelled: !!cancelledAlarmLines[lineId],
+      };
+    });
+
+    return state;
+  }, [linesData, linesBP, effectiveWorkingHours, cancelledAlarmLines]);
+
+  const handleToggleCancelLineAlarm = (lineId: LineNumber, cancel: boolean) => {
+    if (currentUser.role !== "production_engineer") return;
+    setCancelledAlarmLines((prev) => ({
+      ...prev,
+      [lineId]: cancel,
+    }));
+  };
+
+  const handleCancelAllAlarms = () => {
+    if (currentUser.role !== "production_engineer") return;
+    const next: Record<number, boolean> = {};
+    VALID_LINES.forEach((l) => {
+      next[l] = true;
+    });
+    setCancelledAlarmLines(next);
+  };
+
+  // Continuous Web Audio Siren when active line (or any line) has uncancelled Kontrol Jam kendala
+  const isSelectedLineAlarmActive =
+    isAuthenticated &&
+    (lineAlarmState[selectedLine]?.issueCount || 0) > 0 &&
+    !lineAlarmState[selectedLine]?.isCancelled;
+
+  React.useEffect(() => {
+    if (!isSelectedLineAlarmActive) return;
+
+    const playSirenCycle = () => {
+      try {
+        const AudioCtx =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const now = ctx.currentTime;
+
+        [880, 660, 880].forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = "triangle";
+          osc.frequency.setValueAtTime(freq, now + idx * 0.16);
+          gain.gain.setValueAtTime(0.11, now + idx * 0.16);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.16 + 0.14);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.16);
+          osc.stop(now + idx * 0.16 + 0.15);
+        });
+        setTimeout(() => {
+          ctx.close().catch(() => {});
+        }, 700);
+      } catch (e) {}
+    };
+
+    playSirenCycle();
+    const intervalId = window.setInterval(playSirenCycle, 1800);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, [isSelectedLineAlarmActive, selectedLine]);
+
   // Dedicated Initial Login View
   if (!isAuthenticated) {
     return <LoginScreen users={users} onLogin={handleLogin} />;
@@ -963,6 +1364,7 @@ export default function App() {
         setSelectedLine={setSelectedLine}
         currentUser={currentUser}
         users={users}
+        navBars={navBars}
         onSwitchUser={handleSwitchUser}
         onLogout={handleLogout}
         onOpenTargetAnalysis={() => setIsTargetAnalysisOpen(true)}
@@ -1000,12 +1402,16 @@ export default function App() {
             onApplyTandem={handleApplyTandem}
             onUpdateHourlyOutput={handleUpdateHourlyOutput}
             onUpdateRowDefects={handleUpdateRowDefects}
+            onUpdateLineTargetPerHour={handleUpdateLineTargetPerHour}
+            onUpdateRowTargetPerHour={handleUpdateRowTargetPerHour}
             onUpdateProcessAssignment={handleUpdateProcessAssignment}
             onOpenPrintReport={() => setIsPrintReportOpen(true)}
             onOpenSimpleBWPrint={() => setIsSimpleBWPrintOpen(true)}
             onApplyMultiProcessBundle={handleApplyMultiProcessBundle}
             onNavigateToAttendance={() => setActiveTab("attendance")}
             onNavigateToLayout={() => setActiveTab("layout")}
+            onNavigateToPEDashboard={() => setActiveTab("pe-dashboard")}
+            isAlarmCancelledByPE={!!lineAlarmState[selectedLine]?.isCancelled}
             onOpenGoogleScript={() => setIsGoogleScriptModalOpen(true)}
             isGoogleScriptConnected={!!googleScriptConfig.webAppUrl}
             machineRequirements={activeMachineRequirements}
@@ -1084,6 +1490,9 @@ export default function App() {
             onSaveGoogleScriptConfig={handleSaveGoogleScriptConfig}
             onOpenGoogleScript={() => setIsGoogleScriptModalOpen(true)}
             onAddSyncLog={handleAddSyncLog}
+            lineAlarmState={lineAlarmState}
+            onToggleCancelLineAlarm={handleToggleCancelLineAlarm}
+            onCancelAllAlarms={handleCancelAllAlarms}
           />
         )}
 
@@ -1112,25 +1521,32 @@ export default function App() {
             onOpenSimpleBWPrint={() => setIsSimpleBWPrintOpen(true)}
           />
         )}
+
+        {/* VIEW 8: Akses Akun & Hak Bar (Khusus PE) */}
+        {activeTab === "account-access" && (
+          <AccountAccessManager
+            currentUser={currentUser}
+            users={users}
+            navBars={navBars}
+            onAddUser={handleAddUser}
+            onUpdateUser={handleUpdateUser}
+            onDeleteUser={handleDeleteUser}
+            onUpdateNavBars={handleUpdateNavBars}
+          />
+        )}
       </main>
 
       {/* Production Footer */}
-      <footer className="bg-white border-t border-slate-200 py-3.5 text-xs text-slate-500">
+      <footer className="bg-white border-t border-slate-200 py-3 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <div className="flex items-center space-x-2">
             <span className="w-2 h-2 rounded-full bg-blue-600" />
-            <span className="font-semibold text-slate-700">
-              Sewing Production Engineering Monitoring & Operator Grading System
-            </span>
-            <span className="text-slate-400 font-mono">| Lines 1, 3, 4, 5, 6, 7</span>
+            <span className="font-semibold text-slate-700">SEW-IE System</span>
+            <span className="text-slate-400 font-mono">| Line 1, 3, 4, 5, 6, 7</span>
           </div>
 
           <div className="font-mono text-slate-500">
-            Aktif: <strong className="text-slate-800">{currentUser.name}</strong> (
-            {currentUser.role === "production_engineer"
-              ? "PE Head"
-              : `Admin Line ${currentUser.assignedLine}`}
-            ) &bull; Hadir: {presentCount}/{totalOpsCount} Op &bull; BP: {currentLineBP.metadata.buyer} {currentLineBP.metadata.style}
+            <strong className="text-slate-800">{currentUser.name}</strong> &bull; Hadir: {presentCount}/{totalOpsCount} &bull; {currentLineBP.metadata.buyer} ({currentLineBP.metadata.style})
           </div>
         </div>
       </footer>
@@ -1174,7 +1590,7 @@ export default function App() {
         currentUser={currentUser}
         users={users}
         onLoginSuccess={handleSwitchUser}
-        onLogout={() => handleSwitchUser(DEFAULT_USERS[0])}
+        onLogout={handleLogout}
       />
 
       {/* Google Apps Script & Google Spreadsheet Integration Modal */}

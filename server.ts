@@ -8,7 +8,9 @@ import { GoogleGenAI } from "@google/genai";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+// AI Studio container environment routes inbound traffic through Nginx (port 8080) to the app on port 3000.
+// Do not bind to 8080 as that causes EADDRINUSE collisions with Nginx.
+const PORT = parseInt(process.env.DEFAULT_APP_PORT || "3000", 10);
 
 app.use(express.json({ limit: "10mb" }));
 
@@ -214,9 +216,7 @@ async function startServer() {
   const distPath = path.join(process.cwd(), "dist");
   const isProduction =
     process.env.NODE_ENV === "production" ||
-    Boolean(process.env.K_SERVICE) ||
-    (process.env.NODE_ENV !== "development" &&
-      (Boolean(process.env.PORT) || fs.existsSync(path.join(distPath, "index.html"))));
+    (process.env.NODE_ENV !== "development" && fs.existsSync(path.join(distPath, "index.html")));
 
   if (!isProduction) {
     const vite = await createViteServer({

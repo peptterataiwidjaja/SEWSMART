@@ -359,10 +359,10 @@ export const DailyReportSheet: React.FC<DailyReportSheetProps> = ({
           <button
             onClick={onOpenSimpleBWPrint || (() => window.print())}
             className="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all flex items-center space-x-1"
-            title="Cetak Laporan Harian Hitam Putih A4"
+            title="Cetak Laporan Harian"
           >
             <Printer className="w-3.5 h-3.5 text-black" />
-            <span className="hidden sm:inline">Print Hitam Putih</span>
+            <span className="hidden sm:inline">Print</span>
           </button>
         </div>
       </div>

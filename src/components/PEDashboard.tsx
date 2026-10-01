@@ -37,6 +37,9 @@ import {
   Send,
   Sliders,
   Link2,
+  BellRing,
+  VolumeX,
+  Volume2,
 } from "lucide-react";
 import {
   VALID_LINES,
@@ -77,6 +80,9 @@ interface PEDashboardProps {
   onSaveGoogleScriptConfig?: (newConfig: GoogleScriptConfig) => void;
   onOpenGoogleScript?: () => void;
   onAddSyncLog?: (log: GoogleScriptSyncLog) => void;
+  lineAlarmState?: Record<number, { issueCount: number; stations: string[]; isCancelled: boolean }>;
+  onToggleCancelLineAlarm?: (lineId: LineNumber, cancel: boolean) => void;
+  onCancelAllAlarms?: () => void;
 }
 
 export const PEDashboard: React.FC<PEDashboardProps> = ({
@@ -95,6 +101,9 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
   onSaveGoogleScriptConfig,
   onOpenGoogleScript,
   onAddSyncLog,
+  lineAlarmState = {},
+  onToggleCancelLineAlarm,
+  onCancelAllAlarms,
 }) => {
   const [activeTab, setActiveTab] = useState<"comparison" | "pareto" | "fishbone" | "5why" | "recommendations">("comparison");
   const [paretoType, setParetoType] = useState<"defects" | "bottlenecks">("defects");
@@ -379,8 +388,148 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
     }
   };
 
+  const activeRingingLines = VALID_LINES.filter(
+    (l) => (lineAlarmState[l]?.issueCount || 0) > 0 && !lineAlarmState[l]?.isCancelled
+  );
+  const totalLinesWithIssues = VALID_LINES.filter(
+    (l) => (lineAlarmState[l]?.issueCount || 0) > 0
+  );
+
   return (
     <div className="space-y-4">
+      {/* KONTROL ALARM KENDALA KONTROL JAM (KHUSUS PE) */}
+      <div
+        className={`rounded-2xl border p-4 shadow-xs ${
+          activeRingingLines.length > 0
+            ? "bg-red-600 text-white border-red-500"
+            : totalLinesWithIssues.length > 0
+            ? "bg-amber-50 border-amber-300 text-slate-900"
+            : "bg-white border-slate-200 text-slate-900"
+        }`}
+      >
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-black/10">
+          <div className="flex items-center space-x-3">
+            <div
+              className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                activeRingingLines.length > 0
+                  ? "bg-white/20 text-white animate-bounce"
+                  : totalLinesWithIssues.length > 0
+                  ? "bg-amber-500 text-white"
+                  : "bg-emerald-600 text-white"
+              }`}
+            >
+              {activeRingingLines.length > 0 ? (
+                <BellRing className="w-5 h-5" />
+              ) : (
+                <VolumeX className="w-5 h-5" />
+              )}
+            </div>
+            <div>
+              <h3 className="text-sm font-extrabold">
+                Kontrol Alarm Bottleneck Jam ke-3 (Otoritas PE)
+              </h3>
+              <p
+                className={`text-xs mt-0.5 ${
+                  activeRingingLines.length > 0 ? "text-red-100" : "text-slate-600"
+                }`}
+              >
+                {activeRingingLines.length > 0
+                  ? `Alarm bottleneck Jam ke-3 sedang berbunyi terus-menerus pada Line ${activeRingingLines.join(", ")}. Klik "Batalkan Alarm" untuk menghentikan bunyi.`
+                  : totalLinesWithIssues.length > 0
+                  ? `Semua bunyi alarm Jam ke-3 telah dibatalkan oleh PE (${totalLinesWithIssues.length} line tercatat bottleneck pada Jam ke-3).`
+                  : "Tidak ada alarm bottleneck Jam ke-3 aktif."}
+              </p>
+            </div>
+          </div>
+
+          {currentUser.role === "production_engineer" && activeRingingLines.length > 0 && onCancelAllAlarms && (
+            <button
+              type="button"
+              onClick={onCancelAllAlarms}
+              className="px-4 py-2 rounded-xl bg-slate-950 hover:bg-slate-900 text-white text-xs font-extrabold flex items-center space-x-2 shadow-sm transition-colors cursor-pointer shrink-0"
+            >
+              <VolumeX className="w-4 h-4 text-amber-400" />
+              <span>Batalkan Semua Alarm ({activeRingingLines.length} Line)</span>
+            </button>
+          )}
+        </div>
+
+        {/* Per-Line Alarm Status & PE Cancel Buttons */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-3">
+          {VALID_LINES.map((lineId) => {
+            const st = lineAlarmState[lineId] || {
+              issueCount: 0,
+              stations: [],
+              isCancelled: false,
+            };
+            const isRinging = st.issueCount > 0 && !st.isCancelled;
+            const isMuted = st.issueCount > 0 && st.isCancelled;
+
+            return (
+              <div
+                key={lineId}
+                className={`p-2.5 rounded-xl border text-xs flex flex-col justify-between gap-2 ${
+                  isRinging
+                    ? "bg-red-700/80 border-red-400 text-white"
+                    : isMuted
+                    ? "bg-white border-amber-300 text-slate-800"
+                    : "bg-slate-50 border-slate-200 text-slate-600"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => onSelectLine(lineId)}
+                    className="font-mono font-extrabold hover:underline"
+                  >
+                    Line {lineId}
+                  </button>
+                  <span
+                    className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                      isRinging
+                        ? "bg-white text-red-700"
+                        : isMuted
+                        ? "bg-amber-100 text-amber-800"
+                        : "bg-emerald-100 text-emerald-800"
+                    }`}
+                  >
+                    {st.issueCount > 0 ? `${st.issueCount} Kendala` : "Normal"}
+                  </span>
+                </div>
+
+                {st.issueCount > 0 && currentUser.role === "production_engineer" && onToggleCancelLineAlarm ? (
+                  <button
+                    type="button"
+                    onClick={() => onToggleCancelLineAlarm(lineId, !st.isCancelled)}
+                    className={`w-full py-1.5 px-2 rounded-lg font-bold text-[11px] flex items-center justify-center space-x-1 transition-colors cursor-pointer ${
+                      isRinging
+                        ? "bg-amber-400 hover:bg-amber-300 text-slate-950"
+                        : "bg-slate-200 hover:bg-slate-300 text-slate-700"
+                    }`}
+                  >
+                    {isRinging ? (
+                      <>
+                        <VolumeX className="w-3 h-3" />
+                        <span>Batalkan Alarm</span>
+                      </>
+                    ) : (
+                      <>
+                        <Volume2 className="w-3 h-3" />
+                        <span>Bunyikan Lagi</span>
+                      </>
+                    )}
+                  </button>
+                ) : (
+                  <div className="text-[10px] opacity-75">
+                    {st.issueCount > 0 ? "Menunggu PE" : "Aman"}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Sleek, Minimalist PE Control & Date Monitor Header */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
@@ -390,10 +539,10 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
             </span>
             <div>
               <h2 className="text-sm font-bold text-slate-900">
-                Dasbor Monitoring Multi-Line PE
+                Dasbor PE Multi-Line
               </h2>
               <span className="text-[11px] text-slate-500">
-                Evaluasi 6 Line Sewing (Line 1, 3, 4, 5, 6, 7)
+                Line 1, 3, 4, 5, 6, 7
               </span>
             </div>
           </div>
@@ -420,7 +569,7 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
               }`}
             >
               <CalendarDays className="w-3.5 h-3.5" />
-              <span>Per Bulan</span>
+              <span>Bulanan</span>
             </button>
           </div>
         </div>
@@ -436,7 +585,6 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
               </button>
-              <span className="text-[10px] font-bold uppercase text-slate-400">Tgl:</span>
               <input
                 type="date"
                 value={selectedDate}
@@ -460,7 +608,6 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
 
           {/* Month input */}
           <div className="flex items-center space-x-1 bg-slate-50 px-2 py-1 rounded-xl border border-slate-200">
-            <span className="text-[10px] font-bold uppercase text-slate-400">Bln:</span>
             <input
               type="month"
               value={selectedMonth}
@@ -478,8 +625,19 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
             className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-xs transition-all flex items-center space-x-1.5"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-            <span>Diagnostik Target</span>
+            <span>Diagnostik</span>
           </button>
+
+          {isGoogleScriptConnected && (
+            <button
+              onClick={handleQuickSyncDashboard}
+              disabled={isQuickSyncing}
+              className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center space-x-1.5 shadow-xs transition-colors disabled:opacity-50"
+            >
+              <Send className={`w-3.5 h-3.5 ${isQuickSyncing ? "animate-pulse" : ""}`} />
+              <span>{isQuickSyncing ? "Sync..." : "Sync Sheet"}</span>
+            </button>
+          )}
 
           {/* Google Spreadsheet Quick Action Button */}
           <button
@@ -487,12 +645,12 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
             className={`px-3 py-1.5 rounded-xl text-xs font-bold shadow-xs transition-all flex items-center space-x-1.5 border ${
               isGoogleScriptConnected
                 ? "bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300"
-                : "bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700"
+                : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300"
             }`}
-            title="Tautkan atau Atur Dasbor ke Google Spreadsheet via Google Apps Script (.gs)"
+            title="Atur Google Spreadsheet (.gs)"
           >
             <FileSpreadsheet className="w-3.5 h-3.5" />
-            <span>{isGoogleScriptConnected ? "Spreadsheet (.gs) Tertaut" : "Tautkan ke Spreadsheet (gs)"}</span>
+            <span>{isGoogleScriptConnected ? "Sheet Aktif" : "Tautkan Sheet"}</span>
           </button>
         </div>
       </div>
@@ -500,7 +658,7 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
       {/* Sync Toast Feedback */}
       {syncToast && (
         <div
-          className={`p-3.5 rounded-xl border flex items-center justify-between text-xs font-semibold shadow-xs animate-in fade-in ${
+          className={`p-3 rounded-xl border flex items-center justify-between text-xs font-semibold shadow-xs animate-in fade-in ${
             syncToast.type === "success"
               ? "bg-emerald-50 border-emerald-200 text-emerald-900"
               : "bg-red-50 border-red-200 text-red-900"
@@ -523,175 +681,92 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
         </div>
       )}
 
-      {/* GOOGLE SPREADSHEET (.GS) INTEGRATION CARD BANNER */}
-      <div className="bg-gradient-to-r from-emerald-50 via-teal-50/60 to-slate-50 border border-emerald-200 rounded-2xl p-4 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
-        <div className="flex items-start space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-            <FileSpreadsheet className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center space-x-2">
-              <h3 className="text-xs sm:text-sm font-bold text-slate-900">
-                Integrasi Dasbor ke Google Spreadsheet (.gs)
-              </h3>
-              <span
-                className={`text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border ${
-                  isGoogleScriptConnected
-                    ? "bg-emerald-100 text-emerald-800 border-emerald-300"
-                    : "bg-amber-100 text-amber-800 border-amber-300"
-                }`}
-              >
-                {isGoogleScriptConnected ? "🟢 Terhubung ke Spreadsheet" : "⚪ Belum Ditautkan"}
-              </span>
-            </div>
-            <p className="text-xs text-slate-600 mt-0.5">
-              {isGoogleScriptConnected
-                ? `Tertaut ke Spreadsheet tab DASHBOARD_PE. ${
-                    googleScriptConfig?.lastSyncTime
-                      ? `Terakhir disinkronkan: ${googleScriptConfig.lastSyncTime}`
-                      : "Siap disinkronkan kapan saja."
-                  }`
-                : "Tautkan dasbor ke Google Spreadsheet via Apps Script (.gs) untuk mengekspor otomatis KPI 6 Line, Pareto Cacat 80/20 & Ketersediaan Mesin TW1/TW38."}
-            </p>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 self-stretch md:self-auto justify-end shrink-0">
-          {isGoogleScriptConnected && googleScriptConfig?.sheetUrl && (
-            <a
-              href={googleScriptConfig.sheetUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-2xs"
-            >
-              <span>Buka Spreadsheet</span>
-              <ExternalLink className="w-3.5 h-3.5 text-slate-400" />
-            </a>
-          )}
-
-          {isGoogleScriptConnected && (
-            <button
-              onClick={handleQuickSyncDashboard}
-              disabled={isQuickSyncing}
-              className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center space-x-1.5 shadow-xs transition-colors disabled:opacity-50"
-            >
-              <Send className={`w-3.5 h-3.5 ${isQuickSyncing ? "animate-pulse" : ""}`} />
-              <span>{isQuickSyncing ? "Mengirim Data..." : "⚡ Sinkronkan Dasbor"}</span>
-            </button>
-          )}
-
-          <button
-            onClick={() => setIsSpreadsheetModalOpen(true)}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-xs ${
-              isGoogleScriptConnected
-                ? "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300"
-                : "bg-emerald-600 hover:bg-emerald-700 text-white"
-            }`}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            <span>{isGoogleScriptConnected ? "Atur Tautan (.gs)" : "Tautkan ke Spreadsheet (gs)"}</span>
-          </button>
-        </div>
-      </div>
-
       {/* Navigation Sub-Tabs */}
       <div className="flex items-center space-x-1.5 overflow-x-auto pb-1 border-b border-slate-200 text-xs font-bold">
         <button
           onClick={() => setActiveTab("comparison")}
-          className={`px-4 py-2.5 rounded-t-xl transition-all border-b-2 flex items-center space-x-2 ${
+          className={`px-3.5 py-2 rounded-t-xl transition-all border-b-2 flex items-center space-x-1.5 ${
             activeTab === "comparison"
               ? "border-blue-600 text-blue-700 bg-white shadow-2xs font-extrabold"
               : "border-transparent text-slate-600 hover:text-slate-900"
           }`}
         >
-          <Layers className="w-4 h-4" />
-          <span>Komparasi 6 Sewing Line</span>
+          <Layers className="w-3.5 h-3.5" />
+          <span>Komparasi 6 Line</span>
         </button>
 
         <button
           onClick={() => setActiveTab("pareto")}
-          className={`px-4 py-2.5 rounded-t-xl transition-all border-b-2 flex items-center space-x-2 ${
+          className={`px-3.5 py-2 rounded-t-xl transition-all border-b-2 flex items-center space-x-1.5 ${
             activeTab === "pareto"
               ? "border-blue-600 text-blue-700 bg-white shadow-2xs font-extrabold"
               : "border-transparent text-slate-600 hover:text-slate-900"
           }`}
         >
-          <BarChart3 className="w-4 h-4" />
-          <span>Analisis Pareto (80/20)</span>
+          <BarChart3 className="w-3.5 h-3.5" />
+          <span>Pareto (80/20)</span>
         </button>
 
         <button
           onClick={() => setActiveTab("fishbone")}
-          className={`px-4 py-2.5 rounded-t-xl transition-all border-b-2 flex items-center space-x-2 ${
+          className={`px-3.5 py-2 rounded-t-xl transition-all border-b-2 flex items-center space-x-1.5 ${
             activeTab === "fishbone"
               ? "border-blue-600 text-blue-700 bg-white shadow-2xs font-extrabold"
               : "border-transparent text-slate-600 hover:text-slate-900"
           }`}
         >
-          <GitBranch className="w-4 h-4" />
-          <span>Fishbone Diagram (6M)</span>
+          <GitBranch className="w-3.5 h-3.5" />
+          <span>Fishbone (6M)</span>
         </button>
 
         <button
           onClick={() => setActiveTab("5why")}
-          className={`px-4 py-2.5 rounded-t-xl transition-all border-b-2 flex items-center space-x-2 ${
+          className={`px-3.5 py-2 rounded-t-xl transition-all border-b-2 flex items-center space-x-1.5 ${
             activeTab === "5why"
               ? "border-blue-600 text-blue-700 bg-white shadow-2xs font-extrabold"
               : "border-transparent text-slate-600 hover:text-slate-900"
           }`}
         >
-          <HelpCircle className="w-4 h-4" />
-          <span>Analisis 5 Why</span>
+          <HelpCircle className="w-3.5 h-3.5" />
+          <span>5 Why</span>
         </button>
 
         <button
           onClick={() => setActiveTab("recommendations")}
-          className={`px-4 py-2.5 rounded-t-xl transition-all border-b-2 flex items-center space-x-2 ${
+          className={`px-3.5 py-2 rounded-t-xl transition-all border-b-2 flex items-center space-x-1.5 ${
             activeTab === "recommendations"
               ? "border-blue-600 text-blue-700 bg-white shadow-2xs font-extrabold"
               : "border-transparent text-slate-600 hover:text-slate-900"
           }`}
         >
-          <Sparkles className="w-4 h-4 text-amber-500" />
-          <span>Recommendation Engine ({INITIAL_RECOMMENDATIONS.length})</span>
+          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <span>Rekomendasi ({INITIAL_RECOMMENDATIONS.length})</span>
         </button>
       </div>
 
       {/* TAB 1: MULTI-LINE COMPARISON */}
       {activeTab === "comparison" && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm">
-                  Tabel Komparasi Seluruh Line Jahit (Line 1, 3, 4, 5, 6, 7)
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Evaluasi kehadiran operator, ketercapaian target, line balance efficiency, dan titik bottleneck.
-                </p>
-              </div>
-            </div>
-
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
                     <th className="py-3 px-3">Line</th>
                     <th className="py-3 px-3">Supervisor</th>
-                    <th className="py-3 px-3 text-center">Kehadiran (Hadir/Total)</th>
-                    <th className="py-3 px-3 text-center">% Presensi</th>
+                    <th className="py-3 px-3 text-center">Hadir</th>
+                    <th className="py-3 px-3 text-center">Presensi</th>
                     <th className="py-3 px-3 text-center font-mono">Aktual / Target</th>
-                    <th className="py-3 px-3 text-center">% Efisiensi</th>
-                    <th className="py-3 px-3 text-center font-mono font-bold text-blue-700">Line Balancing</th>
-                    <th className="py-3 px-3 text-center">Balance Delay</th>
-                    <th className="py-3 px-3 text-center">Defect Rate</th>
-                    <th className="py-3 px-3 text-center">Bottlenecks</th>
+                    <th className="py-3 px-3 text-center">Efisiensi</th>
+                    <th className="py-3 px-3 text-center font-mono font-bold text-blue-700">Balancing</th>
+                    <th className="py-3 px-3 text-center">Delay</th>
+                    <th className="py-3 px-3 text-center">Defect</th>
+                    <th className="py-3 px-3 text-center">Bottleneck</th>
                     <th className="py-3 px-3 text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {lineComparisons.map((item) => {
-                    const isBelowTarget = item.efficiency < 85;
                     const hasBottleneck = item.bottlenecks > 0;
 
                     return (
@@ -709,10 +784,7 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
 
                         <td className="py-3 px-3 text-center font-mono font-semibold">
                           <span className="text-emerald-700 font-bold">{item.hadirOps}</span>
-                          <span className="text-slate-400"> / {item.totalOps}</span>
-                          {item.absentOps > 0 && (
-                            <span className="text-rose-600 block text-[10px]">({item.absentOps} Absen)</span>
-                          )}
+                          <span className="text-slate-400">/{item.totalOps}</span>
                         </td>
 
                         <td className="py-3 px-3 text-center font-mono">
@@ -786,7 +858,7 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
                             onClick={() => onSelectLine(item.lineId)}
                             className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 font-bold text-[11px] transition-colors inline-flex items-center space-x-1"
                           >
-                            <span>Buka Line</span>
+                            <span>Buka</span>
                             <ArrowRight className="w-3 h-3" />
                           </button>
                         </td>
@@ -802,17 +874,12 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
 
       {/* TAB 2: PARETO ANALYSIS */}
       {activeTab === "pareto" && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-5 space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-slate-100 pb-3">
-              <div>
-                <h3 className="font-bold text-slate-900 text-sm">
-                  Analisis Diagram Pareto (Prinsip 80/20 Garment Industrial Engineering)
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  80% permasalahan produksi dan perlambatan line diakibatkan oleh 20% faktor penyebab dominan.
-                </p>
-              </div>
+              <h3 className="font-bold text-slate-900 text-sm">
+                Diagram Pareto (80/20)
+              </h3>
 
               <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold">
                 <button
@@ -823,7 +890,7 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
-                  Pareto Cacat Jahit (Defects)
+                  Cacat Jahit (Defects)
                 </button>
                 <button
                   onClick={() => setParetoType("bottlenecks")}
@@ -833,7 +900,7 @@ export const PEDashboard: React.FC<PEDashboardProps> = ({
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
-                  Pareto Penyebab Bottleneck
+                  Penyebab Bottleneck
                 </button>
               </div>
             </div>

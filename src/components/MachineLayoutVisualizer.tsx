@@ -105,33 +105,17 @@ export const MachineLayoutVisualizer: React.FC<MachineLayoutVisualizerProps> = (
   }).length;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Top Banner & Mode Toggle */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
-              <Layers className="w-5 h-5 text-blue-600" />
-              <span>Tata Letak Sewing & Line Balancing &bull; Line {lineId}</span>
-            </h2>
-            <span className="text-[11px] px-2 py-0.5 rounded-md font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              Only HADIR Engine
-            </span>
-            {workSchedule === "sabtu" ? (
-              <span className="text-[11px] px-2 py-0.5 rounded-md font-bold bg-amber-50 text-amber-800 border border-amber-300 flex items-center space-x-1">
-                <Clock className="w-3 h-3 text-amber-600" />
-                <span>Sabtu (5 Jam Kerja)</span>
-              </span>
-            ) : (
-              <span className="text-[11px] px-2 py-0.5 rounded-md font-bold bg-blue-50 text-blue-800 border border-blue-200 flex items-center space-x-1">
-                <Clock className="w-3 h-3 text-blue-600" />
-                <span>Senin - Jumat (8 Jam Kerja)</span>
-              </span>
-            )}
-          </div>
-          <p className="text-xs text-slate-500 mt-1">
-            Visualisasi penempatan meja jahit sewing, monitoring unit mesin harian, serta optimasi Double Job (SMV terkecil) & Tandem.
-          </p>
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <h2 className="text-base font-bold text-slate-900 flex items-center space-x-2">
+            <Layers className="w-5 h-5 text-blue-600" />
+            <span>Layout 26 Meja &bull; Line {lineId}</span>
+          </h2>
+          <span className="text-xs px-2.5 py-0.5 rounded-lg font-bold bg-slate-100 text-slate-700">
+            Takt Time: {taktTime} dtk
+          </span>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -146,7 +130,7 @@ export const MachineLayoutVisualizer: React.FC<MachineLayoutVisualizerProps> = (
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                Sen-Jum (8h)
+                8 Jam
               </button>
               <button
                 onClick={() => onToggleWorkSchedule("sabtu")}
@@ -156,7 +140,7 @@ export const MachineLayoutVisualizer: React.FC<MachineLayoutVisualizerProps> = (
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                Sabtu (5h)
+                5 Jam
               </button>
             </div>
           )}
@@ -166,10 +150,9 @@ export const MachineLayoutVisualizer: React.FC<MachineLayoutVisualizerProps> = (
             <button
               onClick={handleApply}
               className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center space-x-1.5 active:scale-95"
-              title="Terapkan penempatan operator rekomendasi ke lembar hourly sheet"
             >
               <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-              <span>Terapkan Rekomendasi ke Line</span>
+              <span>Terapkan Rekomendasi</span>
             </button>
           )}
 
@@ -186,98 +169,94 @@ export const MachineLayoutVisualizer: React.FC<MachineLayoutVisualizerProps> = (
       </div>
 
       {appliedSuccess && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs flex items-center space-x-2 animate-in fade-in">
+        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs flex items-center space-x-2 animate-in fade-in">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span>
-            Rekomendasi layout berhasil diterapkan! Penempatan operator pada lembar Hourly Control Sheet Line {lineId} telah disinkronkan.
-          </span>
+          <span>Rekomendasi layout berhasil diterapkan ke Line {lineId}.</span>
         </div>
       )}
 
-      {/* Alerts & Warning Banner */}
+      {/* Alerts & Warning Banner (Max 2 shown for cleanliness) */}
       {alerts.length > 0 && (
-        <div className="space-y-2">
-          {alerts.map((alt, i) => (
+        <div className="space-y-1.5">
+          {alerts.slice(0, 2).map((alt, i) => (
             <div
               key={i}
-              className={`p-3 border-l-4 rounded-xl text-xs flex items-start space-x-2.5 shadow-2xs ${
+              className={`px-3.5 py-2 border-l-4 rounded-xl text-xs flex items-center space-x-2 ${
                 alt.includes("Kekurangan mesin") || alt.includes("tidak hadir")
                   ? "bg-rose-50 border-rose-500 text-rose-900"
                   : alt.includes("Double Job")
                   ? "bg-amber-50 border-amber-500 text-amber-900"
-                  : alt.includes("Tandem")
-                  ? "bg-indigo-50 border-indigo-500 text-indigo-900"
-                  : "bg-blue-50 border-blue-500 text-blue-900"
+                  : "bg-indigo-50 border-indigo-500 text-indigo-900"
               }`}
             >
-              <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-current" />
-              <div className="leading-relaxed font-medium">{alt}</div>
+              <AlertTriangle className="w-3.5 h-3.5 shrink-0 text-current" />
+              <div className="font-medium truncate">{alt}</div>
             </div>
           ))}
         </div>
       )}
 
       {/* Main Tab Navigation */}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-2">
-        <div className="flex items-center space-x-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2">
+        <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => setActiveTab("floor_plan")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === "floor_plan"
                 ? "bg-blue-600 text-white shadow-xs"
                 : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
             }`}
           >
-            <span>🏭 Denah Visual Meja Sewing (Floor Plan 26)</span>
+            Denah 26 Meja
           </button>
           <button
             onClick={() => setActiveTab("tandem_analysis")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
               activeTab === "tandem_analysis"
                 ? "bg-indigo-600 text-white shadow-xs"
                 : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
             }`}
           >
             <Zap className="w-3.5 h-3.5 text-amber-400" />
-            <span>⚡ Analisis Tandem & Layout 26</span>
+            <span>Tandem</span>
             {tandemAnalysis && tandemAnalysis.exceedingCount > 0 && (
-              <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 text-[10px] font-extrabold ml-1">
+              <span className="px-1.5 py-0.2 rounded-full bg-amber-400 text-slate-950 text-[10px] font-extrabold">
                 +{tandemAnalysis.exceedingCount}
               </span>
             )}
           </button>
           <button
             onClick={() => setActiveTab("machine_bar")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
               activeTab === "machine_bar"
                 ? "bg-blue-600 text-white shadow-xs"
                 : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
             }`}
           >
-            <span>📊 Bar Unit Mesin & Kebutuhan Harian</span>
+            <span>Stok Mesin</span>
             {machineShortagesCount > 0 && (
               <span className="w-2 h-2 rounded-full bg-rose-500 inline-block animate-ping" />
             )}
           </button>
           <button
             onClick={() => setActiveTab("compare")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === "compare"
                 ? "bg-blue-600 text-white shadow-xs"
                 : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
             }`}
           >
-            <span>📋 Daftar Stasiun (Aktual vs Rekomendasi)</span>
+            Daftar Stasiun
           </button>
           <button
             onClick={() => setActiveTab("pitch")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 ${
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
               activeTab === "pitch"
                 ? "bg-blue-600 text-white shadow-xs"
                 : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
             }`}
           >
-            <span>📈 Pitch Diagram (Siklus vs Takt Time)</span>
+            Pitch Diagram
           </button>
         </div>
 
@@ -292,7 +271,7 @@ export const MachineLayoutVisualizer: React.FC<MachineLayoutVisualizerProps> = (
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Layout Rekomendasi (Double Job & Tandem)
+              Rekomendasi
             </button>
             <button
               onClick={() => setViewMode("current")}
@@ -302,7 +281,7 @@ export const MachineLayoutVisualizer: React.FC<MachineLayoutVisualizerProps> = (
                   : "text-slate-600 hover:text-slate-900"
               }`}
             >
-              Layout Aktual Line
+              Aktual
             </button>
           </div>
         )}
@@ -312,30 +291,29 @@ export const MachineLayoutVisualizer: React.FC<MachineLayoutVisualizerProps> = (
       {activeTab === "floor_plan" && (
         <div className="space-y-4">
           {/* Header & Legend */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div className="flex items-center space-x-3">
-              <span className="font-bold text-slate-900">Petunjuk Status Meja Sewing:</span>
-              <span className="flex items-center space-x-1 text-slate-600">
-                <span className="w-3 h-3 rounded-sm bg-emerald-100 border border-emerald-500 inline-block" />
-                <span>Normal Tercukupi</span>
+          <div className="bg-white rounded-2xl border border-slate-200 px-4 py-2.5 shadow-xs flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="font-bold text-slate-800">Status Meja:</span>
+              <span className="flex items-center space-x-1.5 text-slate-600">
+                <span className="w-2.5 h-2.5 rounded-xs bg-emerald-500 inline-block" />
+                <span>Normal</span>
               </span>
-              <span className="flex items-center space-x-1 text-amber-700 font-semibold">
-                <span className="w-3 h-3 rounded-sm bg-amber-100 border border-amber-500 inline-block" />
-                <span>Double Job (SMV Terkecil)</span>
+              <span className="flex items-center space-x-1.5 text-amber-700 font-semibold">
+                <span className="w-2.5 h-2.5 rounded-xs bg-amber-500 inline-block" />
+                <span>Double Job</span>
               </span>
-              <span className="flex items-center space-x-1 text-indigo-700 font-semibold">
-                <span className="w-3 h-3 rounded-sm bg-indigo-100 border border-indigo-500 inline-block" />
-                <span>Tandem (2 Operator)</span>
+              <span className="flex items-center space-x-1.5 text-indigo-700 font-semibold">
+                <span className="w-2.5 h-2.5 rounded-xs bg-indigo-500 inline-block" />
+                <span>Tandem</span>
               </span>
-              <span className="flex items-center space-x-1 text-rose-700 font-bold">
-                <span className="w-3 h-3 rounded-sm bg-rose-100 border-2 border-rose-600 inline-block animate-pulse" />
-                <span>⚠️ Warning / Bottleneck / Kosong</span>
+              <span className="flex items-center space-x-1.5 text-rose-700 font-bold">
+                <span className="w-2.5 h-2.5 rounded-xs bg-rose-500 inline-block" />
+                <span>Bottleneck / Kosong</span>
               </span>
             </div>
 
             <div className="text-slate-500 font-medium">
-              Aliran Material: <strong>Infeed (Kiri) &rarr; Conveyor Tengah &rarr; Outfeed (Kanan)</strong> &bull; Takt Time:{" "}
-              <strong className="text-slate-900">{taktTime}s ({workingHours} Jam)</strong>
+              Klik meja untuk rincian stasiun
             </div>
           </div>
 

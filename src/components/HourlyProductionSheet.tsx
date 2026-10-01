@@ -36,6 +36,11 @@ import {
   ChevronRight,
   CalendarDays,
   Info,
+  BellRing,
+  Volume2,
+  VolumeX,
+  Wrench,
+  ArrowDown,
 } from "lucide-react";
 import { exportProductionSheetToExcel } from "../utils/excelParser";
 import { getGradeBadge } from "../utils/grading";
@@ -66,6 +71,8 @@ interface HourlyProductionSheetProps {
     newDefect: number
   ) => void;
   onUpdateRowDefects?: (processNo: number, newDefects: number) => void;
+  onUpdateLineTargetPerHour?: (newTargetPerHour: number, autoFillActiveHours?: boolean) => void;
+  onUpdateRowTargetPerHour?: (processNo: number, newRowTarget: number) => void;
   onUpdateProcessAssignment?: (
     processNo: number,
     operatorName: string,
@@ -77,6 +84,8 @@ interface HourlyProductionSheetProps {
   onUpdateSewingSchedule?: (date: string, days: string) => void;
   onNavigateToAttendance?: () => void;
   onNavigateToLayout?: () => void;
+  onNavigateToPEDashboard?: () => void;
+  isAlarmCancelledByPE?: boolean;
   onOpenGoogleScript?: () => void;
   isGoogleScriptConnected?: boolean;
   machineRequirements?: MachineRequirement[];
@@ -97,6 +106,8 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
   onApplyTandem,
   onUpdateHourlyOutput,
   onUpdateRowDefects,
+  onUpdateLineTargetPerHour,
+  onUpdateRowTargetPerHour,
   onUpdateProcessAssignment,
   onOpenPrintReport,
   onOpenSimpleBWPrint,
@@ -104,6 +115,8 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
   onUpdateSewingSchedule,
   onNavigateToAttendance,
   onNavigateToLayout,
+  onNavigateToPEDashboard,
+  isAlarmCancelledByPE = false,
   onOpenGoogleScript,
   isGoogleScriptConnected = false,
   machineRequirements = [],
@@ -113,9 +126,15 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
   const [selectedSection, setSelectedSection] = useState<string>("ALL");
   const [editingCell, setEditingCell] = useState<{ processNo: number; hourIndex: number } | null>(null);
   const [editingDefectRow, setEditingDefectRow] = useState<number | null>(null);
+  const [editingTargetRow, setEditingTargetRow] = useState<number | null>(null);
+  const [autoFillHoursOnTarget, setAutoFillHoursOnTarget] = useState<boolean>(false);
   const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
   const [isMultiProcessModalOpen, setIsMultiProcessModalOpen] = useState(false);
   const [actionSuccessMsg, setActionSuccessMsg] = useState<string | null>(null);
+
+  // Helper pembatas maksimal 2 digit di belakang koma
+  const fmt2 = (val: number | undefined | null): number =>
+    Number((Number(val) || 0).toFixed(2));
 
   // Calculate operator workload (how many processes each person handles: 1, 2, or 3)
   const operatorWorkloadMap = React.useMemo(() => {
@@ -149,6 +168,7 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
 
   // Quick batch hour input modal
   const [batchHourModal, setBatchHourModal] = useState<number | null>(null);
+  const [batchHourCustomVal, setBatchHourCustomVal] = useState<string>("");
 
   // Check authorization
   const canEditCurrentLine =
@@ -179,46 +199,179 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
     return matchesSearch && matchesSection;
   });
 
-  // Calculate totals
-  const totalActualSum = lineData.rows.reduce((sum, r) => sum + r.totalActual, 0);
-  const totalTargetSum = lineData.rows.reduce((sum, r) => sum + r.target, 0);
-  const totalBalanceSum = lineData.rows.reduce((sum, r) => sum + r.balanceTarget, 0);
-  const totalDefectsSum = lineData.rows.reduce((sum, r) => sum + r.totalDefects, 0);
-  const bottlenecksCount = lineData.rows.filter((r) => r.status === "bottleneck").length;
-  const unassignedCount = lineData.rows.filter((r) => r.status === "unassigned").length;
+  // Determine highest active inputted hour index (0..7) across the line
+  const maxFilledHourIdx = React.useMemo(() => {
+    let maxIdx = -1;
+    lineData.rows.forEach((r) => {
+      r.hourlyActual.slice(0, activeWorkingHours).forEach((val, idx) => {
+        if ((Number(val) || 0) > 0 && idx > maxIdx) {
+          maxIdx = idx;
+        }
+      });
+    });
+    return maxIdx;
+  }, [lineData.rows, activeWorkingHours]);
 
-  // Real-time Bottleneck Detection & Solution Analysis from Hour Control Data
+  // Jam berlaku: jumlah jam berjalan yang sudah diinput, atau jam kerja aktif (8/5 jam)
+  const jamBerlaku = maxFilledHourIdx >= 0 ? maxFilledHourIdx + 1 : activeWorkingHours;
+
+  // Calculate hourly averages and totals (dibulatkan maks 2 digit di belakang koma)
+  const totalActualSum = fmt2(
+    lineData.rows.reduce(
+      (sum, r) => sum + r.hourlyActual.slice(0, 8).reduce((a, b) => a + (Number(b) || 0), 0),
+      0
+    )
+  );
+
+  // Average target per hour (Target / Jam) - maks 2 digit di belakang koma
+  const avgTargetPerHour =
+    lineData.rows.length > 0
+      ? fmt2(
+          lineData.rows.reduce(
+            (sum, r) => sum + (r.targetPerHour || metadata.lineTargetPerHour || 10),
+            0
+          ) / lineData.rows.length
+        )
+      : fmt2(metadata.lineTargetPerHour || 10);
+
+  const [targetInputStr, setTargetInputStr] = useState<string>(String(avgTargetPerHour));
+  React.useEffect(() => {
+    setTargetInputStr(String(avgTargetPerHour));
+  }, [avgTargetPerHour, lineData.lineId]);
+
+  // Average actual output per inputted hour across the line (maks 2 digit di belakang koma)
+  const avgActualPerHour = React.useMemo(() => {
+    if (lineData.rows.length === 0 || maxFilledHourIdx < 0) return 0;
+    const activeHoursCount = maxFilledHourIdx + 1;
+    const totalAcrossActiveHours = lineData.rows.reduce((sum, r) => {
+      const rowSum = r.hourlyActual
+        .slice(0, activeHoursCount)
+        .reduce((a, b) => a + (Number(b) || 0), 0);
+      return sum + rowSum / activeHoursCount;
+    }, 0);
+    return fmt2(totalAcrossActiveHours / lineData.rows.length);
+  }, [lineData.rows, maxFilledHourIdx]);
+
+  const totalBalancePerHour = fmt2(avgActualPerHour - avgTargetPerHour);
+  const totalDefectsSum = fmt2(
+    lineData.rows.reduce((sum, r) => sum + (Number(r.totalDefects) || 0), 0)
+  );
+
+  // Real-time Bottleneck Detection & Solution Analysis from SMV & Jam Berlaku
   const bottleneckAnalysis = React.useMemo(() => {
-    // 1. Identify rows with bottlenecks from hour control
-    // Conditions:
-    // - Unassigned (operator absent)
-    // - Severe deficit (actual < target * 0.5 when totalActualSum > 0)
-    // - Cycle time > takt time
-    // - High defect rate (> 5%)
+    const allowancePct = metadata.allowancePercentage || 15;
+
     const problematicStations = lineData.rows.filter((r) => {
       const isAbsent = r.operatorAttendance !== "HADIR" || r.status === "unassigned";
       const isBottleneck = r.status === "bottleneck";
-      const isSeverelyLagging = totalActualSum > 50 && r.totalActual < (r.target * 0.6);
-      return isAbsent || isBottleneck || isSeverelyLagging;
+      const targetPerHr = r.targetPerHour || metadata.lineTargetPerHour || 10;
+      const smv = r.smv || 0.75;
+      const sam = smv * (1 + allowancePct / 100);
+      const kapasitasSmvPerJam = smv > 0 ? 60 / smv : 0;
+      const kapasitasSamPerJam = sam > 0 ? 60 / sam : 0;
+
+      // Perhitungan SMV dengan jam berlaku: apakah kapasitas SMV mampu mencapai target per jam
+      const isSmvCapacityShort =
+        !r.isTandem &&
+        !r.isDoubleJob &&
+        (kapasitasSmvPerJam < targetPerHr ||
+          kapasitasSamPerJam < targetPerHr ||
+          (r.cycleTime || 0) >= 85 ||
+          smv >= 1.4);
+
+      // Cek apakah ada jam pada jam berlaku yang aktualnya tidak sesuai (< target per jam)
+      const hasHourBelowTarget = r.hourlyActual
+        .slice(0, activeWorkingHours)
+        .some((val, idx) => {
+          const num = Number(val) || 0;
+          if (num > 0 && num < targetPerHr) return true;
+          if (maxFilledHourIdx >= 0 && idx <= maxFilledHourIdx && num < targetPerHr) return true;
+          return false;
+        });
+
+      return isAbsent || isBottleneck || isSmvCapacityShort || hasHourBelowTarget;
     });
 
-    // 2. Find eligible present operators for Double Job (sorted by smallest primary SMV)
+    // Stasiun yang memicu ALARM pada Jam ke-3 (hanya aktif ketika Jam ke-3 sudah berjalan/diinput, yaitu maxFilledHourIdx >= 2)
+    const jam3BottleneckStations =
+      maxFilledHourIdx < 2
+        ? []
+        : lineData.rows.filter((r) => {
+            const isAbsent = r.operatorAttendance !== "HADIR" || r.status === "unassigned";
+            const targetPerHr = r.targetPerHour || metadata.lineTargetPerHour || 10;
+            const smv = r.smv || 0.75;
+            const sam = smv * (1 + allowancePct / 100);
+            const isSmvShort =
+              !r.isTandem &&
+              !r.isDoubleJob &&
+              (60 / smv < targetPerHr || 60 / sam < targetPerHr || (r.cycleTime || 0) >= 85 || smv >= 1.4);
+
+            const jam3Val = Number(r.hourlyActual[2]) || 0;
+            const isJam3BelowTarget = jam3Val < targetPerHr;
+            const hasHourFromJam3BelowTarget = r.hourlyActual
+              .slice(2, maxFilledHourIdx + 1)
+              .some((val) => (Number(val) || 0) < targetPerHr);
+
+            return (
+              isJam3BelowTarget ||
+              hasHourFromJam3BelowTarget ||
+              ((isAbsent || isSmvShort || r.status === "bottleneck") && isJam3BelowTarget)
+            );
+          });
+
     const presentOpsWithSMV = lineData.rows
-      .filter((r) => r.operatorAttendance === "HADIR" && !r.isDoubleJob && r.status !== "unassigned")
+      .filter(
+        (r) =>
+          r.operatorAttendance === "HADIR" &&
+          !r.isDoubleJob &&
+          r.status !== "unassigned" &&
+          r.status !== "bottleneck"
+      )
       .map((r) => ({
         operatorName: r.operatorName,
         stationNo: r.no,
         process: r.process,
-        smv: r.smv,
+        smv: r.smv || 0.5,
       }))
       .sort((a, b) => a.smv - b.smv);
 
     return {
       problematicStations,
+      jam3BottleneckStations,
       smallestSMVOperators: presentOpsWithSMV,
       isFreshState: totalActualSum === 0,
     };
-  }, [lineData.rows, totalActualSum]);
+  }, [lineData.rows, totalActualSum, metadata.lineTargetPerHour, metadata.allowancePercentage, activeWorkingHours, maxFilledHourIdx]);
+
+  const bottlenecksCount = bottleneckAnalysis.problematicStations.length;
+  const jam3AlarmCount = bottleneckAnalysis.jam3BottleneckStations.length;
+  const unassignedCount = lineData.rows.filter((r) => r.status === "unassigned").length;
+
+  const handleFixAllBottlenecks = () => {
+    const helperCandidate = bottleneckAnalysis.smallestSMVOperators[0];
+    bottleneckAnalysis.problematicStations.forEach((st, idx) => {
+      const cand =
+        bottleneckAnalysis.smallestSMVOperators[
+          idx % Math.max(1, bottleneckAnalysis.smallestSMVOperators.length)
+        ] || helperCandidate;
+      if (
+        (st.status === "unassigned" || st.operatorAttendance !== "HADIR") &&
+        cand &&
+        onApplyDoubleJob
+      ) {
+        onApplyDoubleJob(st.no, cand.operatorName, cand.stationNo);
+      } else if (onApplyTandem) {
+        onApplyTandem(
+          st.no,
+          st.operatorName,
+          cand ? cand.operatorName : "Helper Tandem"
+        );
+      }
+    });
+    showNotification(
+      `Seluruh ${bottlenecksCount} stasiun bottleneck berhasil diperbaiki langsung!`
+    );
+  };
 
   const showNotification = (msg: string) => {
     setActionSuccessMsg(msg);
@@ -272,51 +425,70 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
   const isSunday = dayOfWeek === 0;
 
   return (
-    <div className="space-y-6">
-      {/* Attendance & Status Alert Banner */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="space-y-4">
+      {/* Unified Header & Date Bar */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 font-bold">
+          <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm shrink-0">
             L{lineData.lineId}
           </div>
           <div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-base font-bold text-slate-900">
-                Hourly Production Control &bull; Sewing Line {lineData.lineId}
+                Line {lineData.lineId} &bull; Kontrol Jam
               </h2>
-              <span className="text-[11px] px-2 py-0.5 rounded-md font-mono font-semibold bg-slate-100 text-slate-700">
-                F-SEW-005-00
+              <span className="text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-0.5 rounded-lg border border-blue-200">
+                {formatIndoDateWithDay(activeDate)}
               </span>
-              {workSchedule === "sabtu" ? (
-                <span className="text-[11px] px-2 py-0.5 rounded-md font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                  Sabtu (5 Jam)
-                </span>
-              ) : (
-                <span className="text-[11px] px-2 py-0.5 rounded-md font-bold bg-blue-100 text-blue-900 border border-blue-200">
-                  Senin - Jumat (8 Jam)
+              {isToday && (
+                <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <span>Hari Ini</span>
                 </span>
               )}
-            </div>
-            <div className="text-xs text-slate-500 mt-1 flex flex-wrap items-center gap-x-3">
-              <span className="flex items-center space-x-1.5 font-semibold text-slate-700 bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">
-                <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                <span>Tanggal:</span>
-                <input
-                  type="date"
-                  value={activeDate}
-                  onChange={(e) => {
-                    if (e.target.value) handleDateChange(e.target.value);
-                  }}
-                  className="font-mono text-xs font-bold text-blue-700 bg-white hover:bg-slate-50 px-1.5 py-0.5 rounded cursor-pointer border border-slate-300 shadow-2xs"
-                  title="Pilih tanggal proses yang berjalan"
-                />
-              </span>
             </div>
           </div>
         </div>
 
-        {/* Action Controls */}
+        {/* Right Controls: Date Stepper, Schedule Toggle, Attendance & Print */}
         <div className="flex flex-wrap items-center gap-2">
+          {/* Compact Date Stepper */}
+          <div className="flex items-center bg-slate-50 p-1 rounded-xl border border-slate-200">
+            <button
+              type="button"
+              onClick={handlePrevDay}
+              className="p-1.5 rounded-lg hover:bg-white text-slate-600 transition-all"
+              title="Hari sebelumnya"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <input
+              type="date"
+              value={activeDate}
+              onChange={(e) => {
+                if (e.target.value) handleDateChange(e.target.value);
+              }}
+              className="font-mono text-xs font-bold text-slate-800 bg-transparent px-2 py-0.5 outline-none cursor-pointer"
+            />
+            <button
+              type="button"
+              onClick={handleNextDay}
+              className="p-1.5 rounded-lg hover:bg-white text-slate-600 transition-all"
+              title="Hari berikutnya"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            {!isToday && (
+              <button
+                type="button"
+                onClick={handleSetToday}
+                className="px-2 py-1 ml-1 rounded-lg text-[11px] font-bold bg-blue-600 text-white hover:bg-blue-700 transition-all"
+              >
+                Hari Ini
+              </button>
+            )}
+          </div>
+
           {/* Work Schedule Toggle */}
           {onToggleWorkSchedule && (
             <div className="flex items-center bg-slate-100 p-1 rounded-xl text-xs font-semibold">
@@ -327,9 +499,8 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                     ? "bg-white text-blue-700 shadow-xs font-bold"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
-                title="Senin - Jumat (8 Jam Kerja, Target 80 Pcs)"
               >
-                Sen-Jum (8h)
+                8 Jam
               </button>
               <button
                 onClick={() => onToggleWorkSchedule("sabtu")}
@@ -338,9 +509,8 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                     ? "bg-white text-amber-800 shadow-xs font-bold"
                     : "text-slate-600 hover:text-slate-900"
                 }`}
-                title="Sabtu (5 Jam Kerja, Target 50 Pcs)"
               >
-                Sabtu (5h)
+                5 Jam
               </button>
             </div>
           )}
@@ -348,172 +518,27 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
           {/* Attendance status counter button */}
           <button
             onClick={onNavigateToAttendance}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center space-x-2 ${
+            className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center space-x-1.5 ${
               absentOps > 0
                 ? "bg-amber-50 hover:bg-amber-100 text-amber-900 border-amber-300"
                 : "bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border-emerald-300"
             }`}
-            title="Buka panel Attendance & Grading Operator"
           >
-            <Users className="w-4 h-4" />
+            <Users className="w-3.5 h-3.5" />
             <span>
-              Presensi: <strong>{hadirOps}</strong>/{totalOps} Hadir
-              {absentOps > 0 && ` (${absentOps} Absen)`}
+              {hadirOps}/{totalOps} Hadir
             </span>
           </button>
 
-          {/* Print Hourly Control Sheet (F-SEW-005) */}
+          {/* Print Buttons */}
           {onOpenPrintReport && (
             <button
               id="btn-print-hourly-control"
               onClick={onOpenPrintReport}
               className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center space-x-1.5 shadow-xs transition-colors"
-              title="Cetak Lembar Hourly Production Control (F-SEW-005)"
             >
               <Printer className="w-3.5 h-3.5 text-blue-400" />
-              <span>Print F-SEW-005</span>
-            </button>
-          )}
-
-          {/* Quick Print Hitam Putih A4 */}
-          {onOpenSimpleBWPrint && (
-            <button
-              id="btn-print-bw-hourly-control"
-              onClick={onOpenSimpleBWPrint}
-              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 text-xs font-bold flex items-center space-x-1.5 border border-slate-300 shadow-2xs transition-colors"
-              title="Cetak sederhana hitam putih lembar kerja A4 (Hemat tinta & rapi)"
-            >
-              <Printer className="w-3.5 h-3.5 text-black" />
-              <span>Print Hitam Putih</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* PANEL OPSI PEMILIHAN TANGGAL PROSES YANG BERJALAN                         */}
-      {/* ========================================================================= */}
-      <div className="bg-white rounded-2xl border border-blue-200/90 shadow-xs p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 bg-gradient-to-r from-blue-50/60 via-white to-slate-50">
-        {/* Left: Active Date Status & Details */}
-        <div className="flex items-start sm:items-center space-x-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-xs shrink-0 mt-0.5 sm:mt-0">
-            <CalendarDays className="w-6 h-6" />
-          </div>
-          <div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs uppercase font-extrabold tracking-wider text-slate-500">
-                Opsi Pemilihan Tanggal Proses yang Berjalan:
-              </span>
-              {isToday ? (
-                <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>SEDANG BERJALAN AKTIF (HARI INI)</span>
-                </span>
-              ) : isSaturday ? (
-                <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                  <Clock className="w-3 h-3 text-amber-700" />
-                  <span>JADWAL SABTU (5 JAM KERJA)</span>
-                </span>
-              ) : isSunday ? (
-                <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-900 border border-rose-300">
-                  <AlertCircle className="w-3 h-3 text-rose-600" />
-                  <span>HARI MINGGU (LIBUR / OVERTIME)</span>
-                </span>
-              ) : activeDate < todayStr ? (
-                <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-300">
-                  <Calendar className="w-3 h-3 text-slate-500" />
-                  <span>ARSIP / REKAP HISTORIS</span>
-                </span>
-              ) : (
-                <span className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-300">
-                  <Calendar className="w-3 h-3 text-purple-600" />
-                  <span>JADWAL PRODUKSI MENDATANG</span>
-                </span>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-baseline gap-2 mt-1">
-              <span className="text-base sm:text-xl font-black text-slate-900">
-                {formatIndoDateWithDay(activeDate)}
-              </span>
-              <span className="text-xs text-slate-500 font-medium">
-                (Shift: <strong>{workSchedule === "sabtu" ? "Sabtu (5 Jam)" : "Senin - Jumat (8 Jam)"}</strong> &bull; Target: <strong className="text-blue-700">{activeWorkingHours * 10} Pcs/Hari</strong>)
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Date Picker Controls & Quick Stepper Presets */}
-        <div className="flex flex-wrap items-center gap-2 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-200">
-          {/* Stepper with Previous & Next */}
-          <div className="flex items-center bg-white p-1 rounded-xl border border-slate-300 shadow-2xs">
-            <button
-              type="button"
-              onClick={handlePrevDay}
-              className="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-700 font-semibold text-xs flex items-center space-x-1 transition-all"
-              title="Pindah ke hari sebelumnya (H-1)"
-            >
-              <ChevronLeft className="w-4 h-4 text-slate-500" />
-              <span className="hidden sm:inline">H-1</span>
-            </button>
-
-            <div className="flex items-center px-2 border-x border-slate-200">
-              <input
-                type="date"
-                value={activeDate}
-                onChange={(e) => {
-                  if (e.target.value) handleDateChange(e.target.value);
-                }}
-                className="font-mono text-xs font-bold text-blue-700 bg-blue-50/50 hover:bg-blue-50 focus:bg-white px-2 py-1 rounded-lg border border-blue-200 outline-none cursor-pointer"
-                title="Klik untuk memilih tanggal proses dari kalender"
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={handleNextDay}
-              className="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 text-slate-700 font-semibold text-xs flex items-center space-x-1 transition-all"
-              title="Pindah ke hari berikutnya (H+1)"
-            >
-              <span className="hidden sm:inline">H+1</span>
-              <ChevronRight className="w-4 h-4 text-slate-500" />
-            </button>
-          </div>
-
-          {/* Quick Preset Buttons */}
-          <div className="flex items-center space-x-1.5">
-            <button
-              type="button"
-              onClick={handleSetToday}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all shadow-2xs ${
-                isToday
-                  ? "bg-blue-600 text-white shadow-xs ring-2 ring-blue-300"
-                  : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-blue-400"
-              }`}
-              title="Setel ke tanggal hari ini"
-            >
-              Hari Ini
-            </button>
-            <button
-              type="button"
-              onClick={handleSetYesterday}
-              className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all shadow-2xs"
-              title="Setel ke tanggal kemarin"
-            >
-              Kemarin
-            </button>
-          </div>
-
-          {/* Prompt switch to Saturday schedule if Saturday is selected */}
-          {isSaturday && workSchedule !== "sabtu" && onToggleWorkSchedule && (
-            <button
-              type="button"
-              onClick={() => onToggleWorkSchedule("sabtu")}
-              className="px-2.5 py-1.5 rounded-xl text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white flex items-center space-x-1 animate-pulse shadow-xs"
-              title="Tanggal yang dipilih adalah hari Sabtu, klik untuk beralih ke jadwal 5 Jam"
-            >
-              <Clock className="w-3.5 h-3.5" />
-              <span>Ganti Shift Sabtu (5h)</span>
+              <span>Print</span>
             </button>
           )}
         </div>
@@ -523,6 +548,90 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
         <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs flex items-center space-x-2 animate-in fade-in">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{actionSuccessMsg}</span>
+        </div>
+      )}
+
+      {/* ALARM BOTTLENECK BANNER (Triggered when Jam ke-3 has a bottleneck - Cancelled Only From PE Dashboard by PE) */}
+      {jam3AlarmCount > 0 && (
+        <div
+          className={`rounded-2xl p-3.5 shadow-md border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+            isAlarmCancelledByPE
+              ? "bg-amber-600 text-white border-amber-500"
+              : "bg-red-600 text-white border-red-500"
+          }`}
+        >
+          <div className="flex items-start sm:items-center space-x-3">
+            <div
+              className={`w-9 h-9 rounded-xl bg-white/20 flex items-center justify-center shrink-0 ${
+                !isAlarmCancelledByPE ? "animate-bounce" : ""
+              }`}
+            >
+              {isAlarmCancelledByPE ? (
+                <VolumeX className="w-5 h-5 text-white" />
+              ) : (
+                <BellRing className="w-5 h-5 text-white" />
+              )}
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-extrabold text-xs sm:text-sm tracking-wide uppercase">
+                  {isAlarmCancelledByPE
+                    ? `BOTTLENECK JAM KE-3 (${jam3AlarmCount} Stasiun) • Suara Alarm Dibatalkan PE`
+                    : `ALARM BOTTLENECK JAM KE-3 BERBUNYI (${jam3AlarmCount} Stasiun)`}
+                </span>
+                {!isAlarmCancelledByPE && (
+                  <span className="px-2 py-0.5 rounded-full bg-red-900/70 text-[10px] font-mono font-bold border border-red-300/40">
+                    Hanya dapat dibatalkan oleh PE di Dasbor PE
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-red-100 mt-0.5">
+                Stasiun bottleneck Jam ke-3:{" "}
+                <strong className="font-mono text-white">
+                  {bottleneckAnalysis.jam3BottleneckStations
+                    .map((s) => `#${s.no} ${s.process}`)
+                    .join(", ")}
+                </strong>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            {currentUser.role === "production_engineer" && onNavigateToPEDashboard && (
+              <button
+                type="button"
+                onClick={onNavigateToPEDashboard}
+                className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold flex items-center space-x-1.5 transition-colors cursor-pointer"
+                title="Buka Dasbor PE untuk membatalkan bunyi alarm"
+              >
+                <VolumeX className="w-3.5 h-3.5 text-amber-400" />
+                <span>Kontrol Alarm (Dasbor PE)</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById("bottleneck-analysis-bottom");
+                if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+              }}
+              className="px-3 py-1.5 rounded-xl bg-white text-red-700 hover:bg-red-50 text-xs font-extrabold flex items-center space-x-1 transition-colors cursor-pointer"
+            >
+              <span>Analisis & Perbaikan</span>
+              <ArrowDown className="w-3.5 h-3.5" />
+            </button>
+
+            {canEditCurrentLine && (
+              <button
+                type="button"
+                onClick={handleFixAllBottlenecks}
+                className="px-3 py-1.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold flex items-center space-x-1 transition-colors cursor-pointer"
+              >
+                <Wrench className="w-3.5 h-3.5" />
+                <span>Perbaiki Langsung</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -538,124 +647,90 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
         onOpenMultiProcess={() => setIsMultiProcessModalOpen(true)}
       />
 
-      {/* KPI Overview Cards */}
+      {/* KPI Overview Cards - Crisp & Scannable */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Aktual Line</span>
-          <div className="text-xl font-mono font-extrabold text-blue-700 mt-1">{totalActualSum} pcs</div>
-          <span className="text-[10px] text-slate-500">Kumulatif 26 proses</span>
+        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 block">Rata-rata / Jam</span>
+          <div className="text-2xl font-mono font-black text-blue-700 mt-0.5">{avgActualPerHour}</div>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Target</span>
-          <div className="text-xl font-mono font-extrabold text-slate-800 mt-1">{totalTargetSum} pcs</div>
-          <span className="text-[10px] text-slate-500">
-            {activeWorkingHours} Jam &times; 10 Pcs/Jam
-          </span>
+        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 block">Target / Jam</span>
+          <div className="text-2xl font-mono font-black text-slate-800 mt-0.5">
+            {avgTargetPerHour}
+          </div>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Balance Target</span>
+        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 block">Selisih / Jam</span>
           <div
-            className={`text-xl font-mono font-extrabold mt-1 ${
-              totalBalanceSum >= 0 ? "text-emerald-600" : "text-red-600"
+            className={`text-2xl font-mono font-black mt-0.5 ${
+              totalBalancePerHour >= 0 ? "text-emerald-600" : "text-rose-600"
             }`}
           >
-            {totalBalanceSum >= 0 ? `+${totalBalanceSum}` : totalBalanceSum} pcs
+            {totalBalancePerHour >= 0 ? `+${totalBalancePerHour}` : totalBalancePerHour}
           </div>
-          <span className="text-[10px] text-slate-500">
-            {totalBalanceSum >= 0 ? "Surplus / On Target" : "Defisit Produksi"}
-          </span>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Total Defect</span>
-          <div className="text-xl font-mono font-extrabold text-rose-600 mt-1">{totalDefectsSum} pcs</div>
-          <span className="text-[10px] text-slate-500">
-            Rate: {totalActualSum > 0 ? ((totalDefectsSum / totalActualSum) * 100).toFixed(1) : 0}%
-          </span>
+        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 block">Defect</span>
+          <div className="text-2xl font-mono font-black text-rose-600 mt-0.5">{totalDefectsSum}</div>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Titik Bottleneck</span>
-          <div className="text-xl font-mono font-extrabold text-amber-600 mt-1 flex items-center space-x-1">
+        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 block">Bottleneck</span>
+          <div className="text-2xl font-mono font-black text-amber-600 mt-0.5 flex items-center space-x-1">
             <span>{bottlenecksCount}</span>
             {bottlenecksCount > 0 && <Flame className="w-4 h-4 text-red-500" />}
           </div>
-          <span className="text-[10px] text-slate-500">Stasiun penghambat</span>
         </div>
 
-        <div className="bg-white p-3 rounded-2xl border border-slate-200 shadow-xs">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block">Kehadiran Hari Ini</span>
-          <div className="text-xl font-mono font-extrabold text-emerald-600 mt-1">
-            {totalOps > 0 ? Math.round((hadirOps / totalOps) * 100) : 0}%
+        <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
+          <span className="text-[11px] font-bold text-slate-500 block">Kehadiran</span>
+          <div className="text-2xl font-mono font-black text-emerald-600 mt-0.5">
+            {totalOps > 0 ? fmt2((hadirOps / totalOps) * 100) : 0}%
           </div>
-          <span className="text-[10px] text-slate-500">{hadirOps} dari 26 operator</span>
         </div>
       </div>
 
       {/* Filter and Search Controls */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Section Filter */}
-          <div className="flex items-center space-x-2 text-xs">
-            <Filter className="w-4 h-4 text-slate-400" />
-            <span className="font-bold text-slate-700">Section:</span>
-            <div className="flex flex-wrap gap-1">
-              {sections.map((sec) => (
-                <button
-                  key={sec}
-                  onClick={() => setSelectedSection(sec)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
-                    selectedSection === sec
-                      ? "bg-blue-600 text-white"
-                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                  }`}
-                >
-                  {sec}
-                </button>
-              ))}
-            </div>
-          </div>
+      <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {sections.map((sec) => (
+            <button
+              key={sec}
+              onClick={() => setSelectedSection(sec)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${
+                selectedSection === sec
+                  ? "bg-blue-600 text-white"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}
+            >
+              {sec === "ALL" ? "Semua" : sec}
+            </button>
+          ))}
         </div>
 
-        {/* Right Tools: Multi-Proses Modal Trigger, Print Hitam Putih & Search */}
         <div className="flex flex-wrap items-center gap-2">
-          {/* Multi-Process 1 Op 2-3 Proses Button */}
           <button
             id="btn-open-multi-process-modal"
             onClick={() => setIsMultiProcessModalOpen(true)}
-            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs font-bold transition-colors shadow-2xs"
-            title="Kelola alokasi 1 operator menangani 2 hingga 3 proses (Multi-Process / Double & Triple Job)"
+            className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 text-xs font-bold transition-colors"
           >
             <Layers className="w-3.5 h-3.5 text-purple-600" />
-            <span>Multi-Proses (1 Op : 2-3 Proses)</span>
+            <span>Multi-Proses</span>
             {multiProcessOpsCount > 0 && (
               <span className="px-1.5 py-0.2 rounded-full bg-purple-600 text-white text-[10px] font-extrabold">
-                {multiProcessOpsCount} Op
+                {multiProcessOpsCount}
               </span>
             )}
           </button>
 
-          {/* Quick Print Hitam Putih */}
-          {onOpenSimpleBWPrint && (
-            <button
-              id="btn-hourly-bw-print"
-              onClick={onOpenSimpleBWPrint}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-xs font-bold transition-colors shadow-2xs"
-              title="Print Sederhana Hitam Putih A4 (Multi-Lembar)"
-            >
-              <Printer className="w-3.5 h-3.5 text-black" />
-              <span>Print Hitam Putih</span>
-            </button>
-          )}
-
-          {/* Search */}
           <div className="relative min-w-[200px]">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2" />
             <input
               type="text"
-              placeholder="Cari proses, operator, mesin..."
+              placeholder="Cari proses / operator..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:bg-white focus:border-blue-400 transition-colors"
@@ -669,13 +744,48 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+              <tr className="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-600 uppercase">
                 <th className="py-3 px-2 text-center w-10">No</th>
-                <th className="py-3 px-3 min-w-[150px]">Nama Proses</th>
+                <th className="py-3 px-3 min-w-[150px]">Proses</th>
                 <th className="py-3 px-2 text-center w-20">Mesin</th>
                 <th className="py-3 px-2 text-center w-14">SMV</th>
                 <th className="py-3 px-3 min-w-[130px]">Operator</th>
-                <th className="py-3 px-2 text-center w-14">Target</th>
+                <th className="py-2 px-2 text-center w-24 bg-blue-50/50 border-l border-slate-200">
+                  <div className="flex flex-col items-center gap-1">
+                    <span className="text-blue-900 font-extrabold">Target/Jam</span>
+                    {canEditCurrentLine && onUpdateLineTargetPerHour ? (
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={targetInputStr}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          setTargetInputStr(raw);
+                          const parsed = parseFloat(raw);
+                          if (!isNaN(parsed) && parsed >= 0) {
+                            onUpdateLineTargetPerHour(fmt2(parsed), false);
+                          }
+                        }}
+                        onBlur={() => {
+                          const parsed = fmt2(parseFloat(targetInputStr) || 0);
+                          setTargetInputStr(String(parsed));
+                          onUpdateLineTargetPerHour(parsed, false);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            const parsed = fmt2(parseFloat(targetInputStr) || 0);
+                            setTargetInputStr(String(parsed));
+                            onUpdateLineTargetPerHour(parsed, false);
+                            (e.target as HTMLInputElement).blur();
+                          }
+                        }}
+                        className="w-16 px-1.5 py-0.5 text-center text-xs font-mono font-black text-blue-950 bg-white border-2 border-blue-500 rounded-lg outline-none focus:ring-2 focus:ring-blue-300"
+                        title="Ketik Target/Jam di sini agar seluruh baris pada kolom Target/Jam terisi otomatis"
+                      />
+                    ) : null}
+                  </div>
+                </th>
 
                 {/* Jam 1 s/d Jam 8 */}
                 {[1, 2, 3, 4, 5, 6, 7, 8].map((hr) => {
@@ -683,59 +793,68 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                   return (
                     <th
                       key={hr}
-                      className={`py-3 px-1 text-center w-14 border-l border-slate-200 ${
+                      className={`py-2.5 px-1 text-center w-12 border-l border-slate-200 ${
                         isOffSchedule ? "bg-slate-100/80 text-slate-400" : ""
                       }`}
                     >
                       <div className="flex flex-col items-center">
-                        <span>Jam {hr}</span>
-                        {isOffSchedule ? (
-                          <span className="text-[8px] font-normal text-amber-600">Luar Jam</span>
-                        ) : (
-                          canEditCurrentLine && (
-                            <button
-                              onClick={() => setBatchHourModal(hr)}
-                              className="text-[9px] text-blue-600 hover:underline font-normal cursor-pointer"
-                              title={`Isi massal jam ke-${hr}`}
-                            >
-                              Isi Cepat
-                            </button>
-                          )
+                        <span>J{hr}</span>
+                        {!isOffSchedule && canEditCurrentLine && (
+                          <button
+                            onClick={() => {
+                              setBatchHourCustomVal(String(avgTargetPerHour));
+                              setBatchHourModal(hr);
+                            }}
+                            className="text-[9px] text-blue-600 hover:underline font-normal cursor-pointer"
+                            title={`Isi cepat jam ke-${hr} sesuai target (${avgTargetPerHour} pcs)`}
+                          >
+                            Isi
+                          </button>
                         )}
                       </div>
                     </th>
                   );
                 })}
 
-                <th className="py-3 px-2 text-center w-20 bg-blue-100/90 text-blue-950 border-l border-blue-200">
-                  <div className="flex flex-col items-center">
-                    <span className="font-extrabold text-[10px]">DEFECT</span>
-                    <span className="text-[8px] font-mono font-bold text-blue-700 bg-white/80 px-1 rounded shadow-xs">
-                      ∑ Jam 1-8
-                    </span>
-                  </div>
+                <th className="py-3 px-2 text-center w-16 bg-blue-50 text-blue-900 border-l border-blue-200 font-extrabold">
+                  Total
                 </th>
-                <th className="py-3 px-2 text-center w-16 text-rose-700 bg-rose-50/70 border-l border-rose-100">
-                  <div className="flex flex-col items-center">
-                    <span className="font-extrabold text-[10px] text-rose-800">TOTAL</span>
-                    <span className="text-[8px] font-bold text-rose-600 bg-rose-100 px-1 py-0.2 rounded">
-                      Manual
-                    </span>
-                  </div>
+                <th className="py-3 px-2 text-center w-16 text-rose-700 bg-rose-50/60 border-l border-rose-100 font-extrabold">
+                  Defect
                 </th>
-                <th className="py-3 px-3 min-w-[140px]">Status & Keterangan</th>
-                <th className="py-3 px-2 text-center w-12">Aksi</th>
+                <th className="py-3 px-3 min-w-[110px]">Status</th>
+                <th className="py-3 px-2 text-center w-10"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredRows.map((row) => {
                 const gradeBadge = getGradeBadge(row.operatorGrade);
                 const isUnassigned = row.status === "unassigned";
-                const isBottleneck = row.status === "bottleneck";
+                const rowTargetPerHour = fmt2(
+                  row.targetPerHour || metadata.lineTargetPerHour || 10
+                );
+                const rowTotalActual = fmt2(
+                  row.hourlyActual
+                    .slice(0, 8)
+                    .reduce((acc, val) => acc + (Number(val) || 0), 0)
+                );
+                const rowFilledHours = row.hourlyActual
+                  .slice(0, activeWorkingHours)
+                  .filter(
+                    (val, idx) =>
+                      (Number(val) || 0) > 0 ||
+                      (maxFilledHourIdx >= 0 && idx <= maxFilledHourIdx)
+                  ).length;
+                const rowAvgPerHour =
+                  rowFilledHours > 0
+                    ? fmt2(rowTotalActual / rowFilledHours)
+                    : 0;
+                const isBottleneck =
+                  bottleneckAnalysis.problematicStations.some(
+                    (s) => s.no === row.no
+                  ) && !isUnassigned;
                 const isDoubleJob = row.isDoubleJob;
                 const isTandem = row.isTandem;
-                // Sum of hourly actuals strictly for Jam 1 to Jam 8
-                const rowTotalActual = row.hourlyActual.slice(0, 8).reduce((acc, val) => acc + (Number(val) || 0), 0);
 
                 return (
                   <tr
@@ -743,45 +862,45 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                     id={`row-station-${row.no}`}
                     className={`hover:bg-slate-50/80 transition-colors ${
                       isUnassigned
-                        ? "bg-rose-50/50"
+                        ? "bg-rose-50/40"
                         : isDoubleJob
-                        ? "bg-amber-50/40"
+                        ? "bg-amber-50/30"
                         : isTandem
                         ? "bg-indigo-50/30"
                         : isBottleneck
-                        ? "bg-amber-50/30"
+                        ? "bg-amber-50/20"
                         : ""
                     }`}
                   >
-                    <td className="py-2 px-2 text-center font-mono font-bold text-slate-500">
+                    <td className="py-2.5 px-2 text-center font-mono font-bold text-slate-500">
                       {row.no}
                     </td>
 
-                    <td className="py-2 px-3">
+                    <td className="py-2.5 px-3">
                       <div className="font-bold text-slate-900">{row.process}</div>
                       <div className="text-[10px] text-slate-400">{row.section}</div>
                     </td>
 
-                    <td className="py-2 px-2 text-center">
+                    <td className="py-2.5 px-2 text-center">
                       <span className="font-mono text-[11px] font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
                         {row.machine}
                       </span>
                     </td>
 
-                    <td className="py-2 px-2 text-center font-mono text-slate-600">
-                      {row.smv}m
+                    <td className="py-2.5 px-2 text-center font-mono text-slate-600">
+                      {fmt2(row.smv)}
                     </td>
 
-                    <td className="py-2 px-3">
+                    <td className="py-2.5 px-3">
                       <div className="flex items-center space-x-1.5">
                         <span
                           className={`font-semibold ${
                             isUnassigned ? "text-rose-600 font-bold" : "text-slate-800"
                           }`}
                         >
-                          {row.operatorName}
+                          {isUnassigned ? "Kosong" : row.operatorName}
                         </span>
-                        {gradeBadge && (
+                        {gradeBadge && !isUnassigned && (
                           <span
                             className={`text-[9px] font-bold px-1 py-0.2 rounded ${gradeBadge.lightBg} ${gradeBadge.text}`}
                           >
@@ -790,57 +909,106 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                         )}
                       </div>
                       {operatorWorkloadMap[row.operatorName]?.count === 2 && (
-                        <span className="text-[9px] text-blue-700 font-extrabold bg-blue-100 border border-blue-200 px-1.5 py-0.2 rounded mt-0.5 inline-block">
-                          2 Proses (Double Job)
+                        <span className="text-[9px] text-blue-700 font-bold bg-blue-50 px-1.5 py-0.2 rounded mt-0.5 inline-block">
+                          2 Proses
                         </span>
                       )}
                       {operatorWorkloadMap[row.operatorName]?.count >= 3 && (
-                        <span className="text-[9px] text-purple-700 font-extrabold bg-purple-100 border border-purple-200 px-1.5 py-0.2 rounded mt-0.5 inline-block">
-                          3 Proses (Triple Job)
-                        </span>
-                      )}
-                      {isDoubleJob && !operatorWorkloadMap[row.operatorName]?.count && (
-                        <span className="text-[9px] text-amber-700 font-bold bg-amber-100 px-1 py-0.2 rounded mt-0.5 inline-block">
-                          Double Job (Cover)
-                        </span>
-                      )}
-                      {isTandem && (
-                        <span className="text-[9px] text-indigo-700 font-bold bg-indigo-100 px-1 py-0.2 rounded mt-0.5 inline-block">
-                          Tandem (2 Op)
+                        <span className="text-[9px] text-purple-700 font-bold bg-purple-50 px-1.5 py-0.2 rounded mt-0.5 inline-block">
+                          3 Proses
                         </span>
                       )}
                     </td>
 
-                    <td className="py-2 px-2 text-center font-mono font-bold text-slate-700">
-                      {row.target}
+                    <td className="py-2.5 px-1 text-center font-mono font-bold text-slate-700 bg-slate-50/60 border-l border-slate-100">
+                      {editingTargetRow === row.no && (onUpdateLineTargetPerHour || onUpdateRowTargetPerHour) ? (
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          defaultValue={rowTargetPerHour}
+                          autoFocus
+                          onBlur={(e) => {
+                            const val = fmt2(parseFloat(e.target.value) || 0);
+                            if (onUpdateLineTargetPerHour) {
+                              setTargetInputStr(String(val));
+                              onUpdateLineTargetPerHour(val, false);
+                            } else if (onUpdateRowTargetPerHour) {
+                              onUpdateRowTargetPerHour(row.no, val);
+                            }
+                            setEditingTargetRow(null);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              const val = fmt2(
+                                parseFloat((e.target as HTMLInputElement).value) || 0
+                              );
+                              if (onUpdateLineTargetPerHour) {
+                                setTargetInputStr(String(val));
+                                onUpdateLineTargetPerHour(val, false);
+                              } else if (onUpdateRowTargetPerHour) {
+                                onUpdateRowTargetPerHour(row.no, val);
+                              }
+                              setEditingTargetRow(null);
+                            } else if (e.key === "Escape") {
+                              setEditingTargetRow(null);
+                            }
+                          }}
+                          className="w-14 text-center py-0.5 border-2 border-blue-500 rounded bg-white text-slate-900 font-bold outline-none mx-auto block"
+                        />
+                      ) : (
+                        <div
+                          onClick={() => {
+                            if (canEditCurrentLine && (onUpdateLineTargetPerHour || onUpdateRowTargetPerHour)) {
+                              setEditingTargetRow(row.no);
+                            }
+                          }}
+                          title="Klik untuk ubah Target/Jam (otomatis mengisi kolom Target/Jam)"
+                          className={`py-1 px-1 rounded transition-colors ${
+                            canEditCurrentLine && (onUpdateLineTargetPerHour || onUpdateRowTargetPerHour)
+                              ? "cursor-pointer hover:bg-blue-100/60 text-blue-900"
+                              : ""
+                          }`}
+                        >
+                          {rowTargetPerHour}
+                        </div>
+                      )}
                     </td>
 
-                    {/* Hourly inputs */}
-                    {row.hourlyActual.map((act, hIdx) => {
+                    {/* Hourly inputs (Strictly Jam 1 to Jam 8) */}
+                    {row.hourlyActual.slice(0, 8).map((act, hIdx) => {
                       const isEditing =
                         editingCell?.processNo === row.no && editingCell?.hourIndex === hIdx;
                       const isOffSchedule = hIdx + 1 > activeWorkingHours;
+                      const numAct = fmt2(Number(act) || 0);
+                      const isBelowTarget =
+                        !isOffSchedule &&
+                        ((numAct > 0 && numAct < rowTargetPerHour) ||
+                          (maxFilledHourIdx >= 0 &&
+                            hIdx <= maxFilledHourIdx &&
+                            numAct < rowTargetPerHour));
 
                       return (
                         <td
                           key={hIdx}
-                          className={`py-1 px-1 text-center font-mono border-l border-slate-100 ${
+                          className={`py-1.5 px-1 text-center font-mono border-l border-slate-100 ${
                             isOffSchedule ? "bg-slate-50 text-slate-400" : ""
                           }`}
                         >
                           {isEditing ? (
                             <input
                               type="number"
-                              defaultValue={act}
+                              step="0.01"
+                              defaultValue={numAct}
                               autoFocus
                               onBlur={(e) => {
-                                const val = parseInt(e.target.value, 10) || 0;
+                                const val = fmt2(parseFloat(e.target.value) || 0);
                                 onUpdateHourlyOutput(row.no, hIdx, val, row.hourlyDefects[hIdx] || 0);
                                 setEditingCell(null);
                               }}
                               onKeyDown={(e) => {
                                 if (e.key === "Enter") {
-                                  const val = parseInt((e.target as HTMLInputElement).value, 10) || 0;
+                                  const val = fmt2(parseFloat((e.target as HTMLInputElement).value) || 0);
                                   onUpdateHourlyOutput(row.no, hIdx, val, row.hourlyDefects[hIdx] || 0);
                                   setEditingCell(null);
                                 }
@@ -854,31 +1022,33 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                                   setEditingCell({ processNo: row.no, hourIndex: hIdx });
                                 }
                               }}
+                              title={
+                                isBelowTarget
+                                  ? `Jam ke-${hIdx + 1}: ${numAct}/${rowTargetPerHour} pcs (Di bawah target/jam -> Bottleneck)`
+                                  : `Jam ke-${hIdx + 1}: ${numAct} pcs`
+                              }
                               className={`py-1 rounded cursor-pointer transition-colors ${
                                 canEditCurrentLine ? "hover:bg-blue-50" : ""
                               } ${
-                                act === 0 && !isOffSchedule && row.totalActual > 0
-                                  ? "text-rose-500 font-bold bg-rose-50/60"
+                                isBelowTarget
+                                  ? "text-rose-700 font-extrabold bg-rose-100/80 ring-1 ring-rose-300"
                                   : "text-slate-800"
                               }`}
                             >
-                              {act}
+                              {numAct}
                             </div>
                           )}
                         </td>
                       );
                     })}
 
-                    {/* DEFECT (∑ Jam 1-8) */}
-                    <td
-                      className="py-2 px-2 text-center font-mono font-black bg-blue-50/70 text-blue-950 border-l border-blue-200"
-                      title={`DEFECT (∑ Jam 1-8): ${rowTotalActual} pcs`}
-                    >
+                    {/* Total Output (SUM dari J1 s/d J8) */}
+                    <td className="py-2.5 px-2 text-center font-mono font-black text-xs bg-blue-50/60 text-blue-950 border-l border-blue-200">
                       {rowTotalActual}
                     </td>
 
-                    {/* TOTAL (Manual Input) */}
-                    <td className="py-2 px-1 text-center font-mono font-bold text-rose-600 border-l border-rose-100 bg-rose-50/20">
+                    {/* Defect (Manual Input) */}
+                    <td className="py-2.5 px-1 text-center font-mono font-bold text-rose-600 border-l border-rose-100 bg-rose-50/20">
                       {editingDefectRow === row.no ? (
                         <input
                           type="number"
@@ -916,14 +1086,9 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                           disabled={!canEditCurrentLine}
                           className={`w-full py-1 px-1 rounded flex items-center justify-center space-x-1 group transition-colors ${
                             canEditCurrentLine
-                              ? "cursor-pointer hover:bg-rose-100/70 border border-transparent hover:border-rose-300"
-                              : "cursor-default border border-transparent"
+                              ? "cursor-pointer hover:bg-rose-100/70"
+                              : "cursor-default"
                           }`}
-                          title={
-                            canEditCurrentLine
-                              ? "Klik untuk memasukkan TOTAL secara manual"
-                              : "Hanya Admin Line / PE yang dapat mengubah TOTAL"
-                          }
                         >
                           <span
                             className={`font-mono font-bold text-xs ${
@@ -932,29 +1097,26 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                           >
                             {row.totalDefects || 0}
                           </span>
-                          {canEditCurrentLine && (
-                            <Edit2 className="w-2.5 h-2.5 text-rose-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                          )}
                         </button>
                       )}
                     </td>
 
-                    {/* Status & Keterangan */}
-                    <td className="py-2 px-3 text-[11px]">
+                    {/* Status */}
+                    <td className="py-2.5 px-3 text-[11px]">
                       {isUnassigned ? (
                         <span className="font-bold text-rose-700 flex items-center space-x-1">
                           <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
-                          <span>Operator Kosong!</span>
+                          <span>Kosong</span>
                         </span>
                       ) : isDoubleJob ? (
                         <span className="font-bold text-amber-800 flex items-center space-x-1">
                           <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                          <span>Double Job Aktif</span>
+                          <span>Double Job</span>
                         </span>
                       ) : isTandem ? (
                         <span className="font-bold text-indigo-800 flex items-center space-x-1">
                           <Zap className="w-3.5 h-3.5 text-indigo-600" />
-                          <span>Tandem Aktif</span>
+                          <span>Tandem</span>
                         </span>
                       ) : isBottleneck ? (
                         <span className="font-bold text-amber-700 flex items-center space-x-1">
@@ -962,12 +1124,12 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                           <span>Bottleneck</span>
                         </span>
                       ) : (
-                        <span className="text-slate-600">{row.keterangan}</span>
+                        <span className="text-emerald-700 font-semibold">Normal</span>
                       )}
                     </td>
 
                     {/* Action edit assignment */}
-                    <td className="py-2 px-2 text-center">
+                    <td className="py-2.5 px-2 text-center">
                       {canEditCurrentLine && (
                         <button
                           onClick={() =>
@@ -980,7 +1142,7 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                             })
                           }
                           className="p-1 rounded-md text-slate-400 hover:text-blue-600 hover:bg-slate-100 transition-colors"
-                          title="Ganti Operator / Mesin Stasiun Ini"
+                          title="Ubah Operator / Mesin"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
@@ -991,29 +1153,35 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
               })}
             </tbody>
 
-            {/* SUMMARY FOOTER: SUM PADA KOLOM TOTAL & PER-JAM */}
-            <tfoot className="bg-slate-100/95 font-bold border-t-2 border-slate-300 text-slate-800 text-[11px]">
+            {/* SUMMARY FOOTER: RATA-RATA DARI DATA INPUT PER JAM */}
+            <tfoot className="bg-slate-100 font-bold border-t-2 border-slate-300 text-slate-800 text-xs">
               <tr>
-                <td colSpan={5} className="py-3 px-3 text-right uppercase tracking-wider text-slate-700">
-                  <div className="flex items-center justify-end space-x-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
-                    <span className="font-extrabold text-slate-900">
-                      TOTAL SUM OUTPUT ({filteredRows.length} PROSES):
-                    </span>
-                  </div>
+                <td colSpan={5} className="py-3 px-3 text-right uppercase text-slate-700 font-extrabold">
+                  Total Rata-Rata / Jam ({filteredRows.length} Proses)
                 </td>
 
-                {/* SUM Target */}
                 <td className="py-3 px-2 text-center font-mono font-black text-slate-900 bg-slate-200/60">
-                  {filteredRows.reduce((sum, r) => sum + (r.target || 0), 0)}
+                  {filteredRows.length > 0
+                    ? fmt2(
+                        filteredRows.reduce(
+                          (sum, r) =>
+                            sum +
+                            (r.targetPerHour || metadata.lineTargetPerHour || 10),
+                          0
+                        ) / filteredRows.length
+                      )
+                    : avgTargetPerHour}
                 </td>
 
-                {/* SUM Jam 1 s/d Jam 8 */}
                 {[0, 1, 2, 3, 4, 5, 6, 7].map((hIdx) => {
-                  const hourTotal = filteredRows.reduce(
+                  const hourSum = filteredRows.reduce(
                     (sum, r) => sum + (Number(r.hourlyActual[hIdx]) || 0),
                     0
                   );
+                  const hourAvg =
+                    filteredRows.length > 0
+                      ? fmt2(hourSum / filteredRows.length)
+                      : 0;
                   const isOffSchedule = hIdx + 1 > activeWorkingHours;
                   return (
                     <td
@@ -1021,52 +1189,43 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
                       className={`py-3 px-1 text-center font-mono font-bold border-l border-slate-200 ${
                         isOffSchedule
                           ? "bg-slate-200/40 text-slate-400"
+                          : hourAvg > 0 && hourAvg < avgTargetPerHour
+                          ? "text-rose-700 bg-rose-100/60"
                           : "text-slate-900 bg-slate-100"
                       }`}
                     >
-                      {hourTotal}
+                      {hourAvg}
                     </td>
                   );
                 })}
 
-                {/* SUM PADA KOLOM DEFECT (Jam 1 s/d Jam 8) */}
-                <td
-                  className="py-3 px-2 text-center font-mono font-black text-sm bg-blue-200/80 text-blue-950 border-l border-blue-300 shadow-inner"
-                  title="SUM Kolom DEFECT (Jam 1 s/d Jam 8)"
-                >
-                  {filteredRows.reduce(
-                    (totalSum, r) =>
-                      totalSum +
-                      r.hourlyActual.slice(0, 8).reduce((rowSum, val) => rowSum + (Number(val) || 0), 0),
-                    0
-                  )}
-                </td>
-
-                {/* SUM PADA KOLOM TOTAL (Manual) */}
-                <td
-                  className="py-3 px-2 text-center font-mono font-bold text-rose-700 bg-rose-50/70"
-                  title="SUM Kolom TOTAL (Manual)"
-                >
-                  {filteredRows.reduce((sum, r) => sum + (Number(r.totalDefects) || 0), 0)}
-                </td>
-
-                {/* Line Achievement / Summary Status */}
-                <td className="py-3 px-3 text-[11px]">
+                <td className="py-3 px-2 text-center font-mono font-black text-sm bg-blue-200/80 text-blue-950 border-l border-blue-300">
                   {(() => {
-                    const totalTgt = filteredRows.reduce((sum, r) => sum + (r.target || 0), 0);
-                    const totalAct = filteredRows.reduce(
-                      (totalSum, r) =>
-                        totalSum +
-                        r.hourlyActual.reduce((rowSum, val) => rowSum + (Number(val) || 0), 0),
-                      0
-                    );
-                    const pct = totalTgt > 0 ? Math.round((totalAct / totalTgt) * 100) : 0;
+                    if (filteredRows.length === 0) return 0;
+                    const sumOfHourAvgs = [0, 1, 2, 3, 4, 5, 6, 7].reduce((acc, hIdx) => {
+                      const hourSum = filteredRows.reduce(
+                        (sum, r) => sum + (Number(r.hourlyActual[hIdx]) || 0),
+                        0
+                      );
+                      return acc + hourSum / filteredRows.length;
+                    }, 0);
+                    return fmt2(sumOfHourAvgs);
+                  })()}
+                </td>
+
+                <td className="py-3 px-2 text-center font-mono font-bold text-rose-700 bg-rose-50/70">
+                  {fmt2(filteredRows.reduce((sum, r) => sum + (Number(r.totalDefects) || 0), 0))}
+                </td>
+
+                <td className="py-3 px-3 text-xs">
+                  {(() => {
+                    const pct =
+                      avgTargetPerHour > 0
+                        ? fmt2((avgActualPerHour / avgTargetPerHour) * 100)
+                        : 0;
                     return (
-                      <span className="font-bold text-blue-900 flex items-center space-x-1.5">
-                        <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-[10px] font-mono">
-                          {pct}%
-                        </span>
-                        <span>Efisiensi Output</span>
+                      <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-mono font-bold">
+                        {pct}%
                       </span>
                     );
                   })()}
@@ -1079,156 +1238,224 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* BOTTLENECK SUGGESTIONS & ENGINEERING RECOMMENDATIONS (BELOW TABLE) */}
-      {/* ========================================================================= */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-4 space-y-3">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2.5 border-b border-slate-100">
-          <div className="flex items-center space-x-2">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
-              Saran Solusi Bottleneck & Optimasi Line
-            </h3>
+      {/* Analisis Bottleneck & Perbaikan Langsung (Bagian Bawah) */}
+      <div
+        id="bottleneck-analysis-bottom"
+        className={`rounded-2xl border shadow-xs p-5 space-y-4 ${
+          bottlenecksCount > 0
+            ? "bg-white border-red-300 ring-1 ring-red-200"
+            : "bg-white border-slate-200"
+        }`}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+          <div className="flex items-center space-x-2.5">
+            <div
+              className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                bottlenecksCount > 0
+                  ? "bg-red-600 text-white"
+                  : "bg-emerald-600 text-white"
+              }`}
+            >
+              {bottlenecksCount > 0 ? (
+                <Flame className="w-5 h-5" />
+              ) : (
+                <CheckCircle2 className="w-5 h-5" />
+              )}
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-sm">
+                Analisis Bottleneck & Perbaikan Langsung
+              </h3>
+              <p className="text-xs text-slate-500">
+                {bottlenecksCount > 0
+                  ? `Ditemukan ${bottlenecksCount} stasiun bottleneck yang menghambat aliran produksi Line ${lineData.lineId}. Pilih tindakan perbaikan langsung di bawah.`
+                  : `Tidak ada bottleneck pada Line ${lineData.lineId}. Aliran proses berjalan seimbang.`}
+              </p>
+            </div>
           </div>
-          <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-50 text-blue-700 w-fit">
-            Double Job (SMV Minimum) &bull; Tandem (Beban &gt; Kapasitas)
-          </span>
+
+          {bottlenecksCount > 0 && canEditCurrentLine && (
+            <button
+              type="button"
+              onClick={handleFixAllBottlenecks}
+              className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center space-x-1.5 shadow-xs transition-colors cursor-pointer self-start sm:self-auto"
+            >
+              <Wrench className="w-4 h-4" />
+              <span>Perbaiki Semua Bottleneck ({bottlenecksCount})</span>
+            </button>
+          )}
         </div>
 
-        {/* Suggestion Cards Container */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* Card 1: SARAN DOUBLE JOB (SMV TERKECIL) */}
-          <div className="p-3.5 rounded-xl border border-amber-200 bg-amber-50/40 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-amber-900 flex items-center space-x-1.5">
-                <Users className="w-3.5 h-3.5 text-amber-600" />
-                <span>Double Job &bull; Cover Operator Kosong</span>
-              </span>
-              <span className="text-[10px] font-semibold text-amber-700 bg-amber-100/80 px-2 py-0.5 rounded">
-                Prioritas SMV Terkecil
-              </span>
-            </div>
+        {bottlenecksCount > 0 ? (
+          <div className="space-y-3">
+            {bottleneckAnalysis.problematicStations.map((st, idx) => {
+              const isAbsent =
+                st.status === "unassigned" || st.operatorAttendance !== "HADIR";
+              const targetPerHr = fmt2(
+                st.targetPerHour || metadata.lineTargetPerHour || 10
+              );
+              const smv = fmt2(st.smv || 0.75);
+              const allowancePct = metadata.allowancePercentage || 15;
+              const sam = fmt2(smv * (1 + allowancePct / 100));
+              const kapasitasSmvPerJam = smv > 0 ? fmt2(60 / smv) : 0;
+              const kapasitasEfektifPerJam = sam > 0 ? fmt2(60 / sam) : 0;
 
-            {/* Candidates List */}
-            {bottleneckAnalysis.problematicStations.filter(s => s.status === "unassigned" || s.operatorAttendance !== "HADIR").length > 0 ? (
-              <div className="space-y-2">
-                {bottleneckAnalysis.problematicStations
-                  .filter(s => s.status === "unassigned" || s.operatorAttendance !== "HADIR")
-                  .slice(0, 3)
-                  .map((prob) => {
-                    const bestCandidate = bottleneckAnalysis.smallestSMVOperators[0];
+              const rowAct = fmt2(
+                st.hourlyActual
+                  .slice(0, 8)
+                  .reduce((a, b) => a + (Number(b) || 0), 0)
+              );
+              const activeHrsForRow = maxFilledHourIdx >= 0 ? maxFilledHourIdx + 1 : activeWorkingHours;
+              const rowAvgHr =
+                activeHrsForRow > 0
+                  ? fmt2(rowAct / activeHrsForRow)
+                  : 0;
+              const cycleSec = fmt2(st.cycleTime || Math.round(smv * 60));
 
-                    return (
-                      <div
-                        key={prob.no}
-                        className="bg-white p-2.5 rounded-lg border border-amber-200 text-xs space-y-1.5"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-slate-800">
-                            St. #{prob.no}: {prob.process}
-                          </span>
-                          <span className="font-mono text-rose-600 font-bold bg-rose-50 px-1.5 py-0.5 rounded text-[10px]">
-                            Kosong ({prob.smv}m)
-                          </span>
-                        </div>
+              // Cari jam mana saja yang tidak sesuai target per jam
+              const laggingHoursList: string[] = [];
+              st.hourlyActual.slice(0, activeWorkingHours).forEach((v, hIdx) => {
+                const val = fmt2(Number(v) || 0);
+                if (
+                  (val > 0 && val < targetPerHr) ||
+                  (maxFilledHourIdx >= 0 && hIdx <= maxFilledHourIdx && val < targetPerHr)
+                ) {
+                  laggingHoursList.push(`J${hIdx + 1} (${val}/${targetPerHr})`);
+                }
+              });
 
-                        {bestCandidate ? (
-                          <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
-                            <div className="text-slate-600">
-                              Cover: <strong className="text-blue-700">{bestCandidate.operatorName}</strong>
-                              <span className="text-slate-400 text-[10px]"> (St. #{bestCandidate.stationNo} &bull; {bestCandidate.smv}m)</span>
-                            </div>
-                            {canEditCurrentLine && onApplyDoubleJob && (
-                              <button
-                                onClick={() => {
-                                  onApplyDoubleJob(prob.no, bestCandidate.operatorName, bestCandidate.stationNo);
-                                  showNotification(`Double Job diterapkan: ${bestCandidate.operatorName} meng-cover Stasiun #${prob.no}!`);
-                                }}
-                                className="px-2 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold text-[10px]"
-                              >
-                                Terapkan
-                              </button>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="text-slate-400 text-[10px]">
-                            Semua operator hadir bertugas penuh.
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
-            ) : (
-              <div className="bg-white p-2.5 rounded-lg border border-slate-200 text-xs text-slate-600 flex items-center space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Semua stasiun terisi operator normal.</span>
-              </div>
-            )}
-          </div>
+              const menitTersedia = fmt2(jamBerlaku * 60);
+              const menitDibutuhkanSmv = fmt2(jamBerlaku * targetPerHr * smv);
+              const menitAktualSmv = fmt2(rowAct * smv);
 
-          {/* Card 2: SARAN TANDEM (KAPASITAS MELEBIHI / SIKLUS BERAT) */}
-          <div className="p-3.5 rounded-xl border border-indigo-200 bg-indigo-50/40 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-indigo-900 flex items-center space-x-1.5">
-                <Zap className="w-3.5 h-3.5 text-indigo-600" />
-                <span>Tandem &bull; Reduksi Siklus Berat (&gt;26 / Bottleneck)</span>
-              </span>
-              <span className="text-[10px] font-semibold text-indigo-700 bg-indigo-100/80 px-2 py-0.5 rounded">
-                Bagi Beban 50%
-              </span>
-            </div>
+              const candidateOp =
+                bottleneckAnalysis.smallestSMVOperators[
+                  idx %
+                    Math.max(1, bottleneckAnalysis.smallestSMVOperators.length)
+                ] || bottleneckAnalysis.smallestSMVOperators[0];
 
-            {/* Heavy stations */}
-            {lineData.rows.filter(r => r.cycleTime > 80 || r.status === "bottleneck").length > 0 ? (
-              <div className="space-y-2">
-                {lineData.rows
-                  .filter(r => r.cycleTime > 80 || r.status === "bottleneck")
-                  .slice(0, 3)
-                  .map((st) => (
-                    <div
-                      key={st.no}
-                      className="bg-white p-2.5 rounded-lg border border-indigo-200 text-xs space-y-1.5"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-bold text-slate-800">
-                          St. #{st.no}: {st.process}
-                        </span>
-                        <span className="font-mono text-indigo-700 font-bold bg-indigo-50 px-1.5 py-0.5 rounded text-[10px]">
-                          {st.cycleTime}s (Berat)
-                        </span>
-                      </div>
+              // Root cause diagnosis text from SMV & Jam Berlaku
+              let causeTitle = `Kapasitas SMV (${kapasitasEfektifPerJam} pcs/jam) < Target (${targetPerHr} pcs/jam)`;
+              let causeDetail = `Perhitungan SMV (${smv} mnt/pcs) pada Jam Berlaku (${jamBerlaku} jam = ${menitTersedia} mnt): membutuhkan ${menitDibutuhkanSmv} mnt kerja efektif (Siklus ${cycleSec}d).`;
 
-                      <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-[11px]">
-                        <span className="text-slate-600">
-                          2 Op &rarr; Jadi <strong>{Math.round(st.cycleTime / 2)}s</strong>
-                        </span>
-                        {canEditCurrentLine && onApplyTandem && !st.isTandem && (
-                          <button
-                            onClick={() => {
-                              onApplyTandem(st.no, st.operatorName, "Helper Tandem");
-                              showNotification(`Tandem diterapkan pada Stasiun #${st.no}!`);
-                            }}
-                            className="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded font-bold text-[10px]"
-                          >
-                            Terapkan
-                          </button>
-                        )}
-                        {st.isTandem && (
-                          <span className="text-emerald-700 font-bold text-[10px]">Tandem Aktif</span>
-                        )}
-                      </div>
+              if (isAbsent) {
+                causeTitle = `Stasiun Kosong (Operator ${st.operatorAttendance})`;
+                causeDetail = `Operator ${st.operatorName} tidak hadir pada Jam Berlaku (${jamBerlaku} jam), kehilangan kapasitas ${jamBerlaku * targetPerHr} pcs.`;
+              } else if (laggingHoursList.length > 0) {
+                causeTitle = `Target / Jam Tidak Tercapai pada ${laggingHoursList.join(", ")}`;
+                causeDetail = `Rata-rata input ${rowAvgHr} pcs/jam (Target: ${targetPerHr} pcs/jam). Dari SMV ${smv} mnt × ${jamBerlaku} jam berlaku (${menitTersedia} mnt), beban kerja mencapai ${menitAktualSmv}/${menitDibutuhkanSmv} mnt (Kapasitas SMV maks: ${kapasitasSmvPerJam} pcs/jam).`;
+              }
+
+              return (
+                <div
+                  key={st.no}
+                  className="p-3.5 rounded-xl border border-red-200 bg-red-50/30 flex flex-col lg:flex-row lg:items-center justify-between gap-3"
+                >
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-2 py-0.5 rounded bg-red-600 text-white font-mono font-bold text-xs">
+                        Stasiun #{st.no}
+                      </span>
+                      <span className="font-bold text-slate-900 text-xs sm:text-sm">
+                        {st.process}
+                      </span>
+                      <span className="font-mono text-xs px-2 py-0.5 rounded bg-slate-200/80 text-slate-800 font-semibold">
+                        {st.machine} &bull; SMV {st.smv}m ({cycleSec}d)
+                      </span>
+                      <span className="text-xs text-slate-600 font-medium">
+                        Op: <strong>{st.operatorName}</strong> ({st.operatorGrade})
+                      </span>
                     </div>
-                  ))}
-              </div>
-            ) : (
-              <div className="bg-white p-2.5 rounded-lg border border-slate-200 text-xs text-slate-600 flex items-center space-x-2">
-                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <span>Waktu siklus tiap stasiun seimbang.</span>
-              </div>
-            )}
+
+                    <div className="text-xs text-red-800 font-semibold flex items-center space-x-1.5">
+                      <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                      <span>Analisis: {causeTitle}</span>
+                    </div>
+                    <p className="text-xs text-slate-600">{causeDetail}</p>
+                  </div>
+
+                  {/* Direct Fix Action Buttons */}
+                  {canEditCurrentLine && (
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      {/* 1. Direct Double Job Fix */}
+                      {candidateOp && onApplyDoubleJob && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onApplyDoubleJob(
+                              st.no,
+                              candidateOp.operatorName,
+                              candidateOp.stationNo
+                            );
+                            showNotification(
+                              `Perbaikan Double Job diterapkan: ${candidateOp.operatorName} (St. #${candidateOp.stationNo}) membantu Stasiun #${st.no}`
+                            );
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer"
+                          title={`Tugaskan ${candidateOp.operatorName} (SMV terkecil ${candidateOp.smv}m) untuk Double Job`}
+                        >
+                          <Users className="w-3.5 h-3.5" />
+                          <span>
+                            Double Job ({candidateOp.operatorName.split(" ")[0]})
+                          </span>
+                        </button>
+                      )}
+
+                      {/* 2. Direct Tandem Fix */}
+                      {onApplyTandem && !st.isTandem && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onApplyTandem(
+                              st.no,
+                              st.operatorName,
+                              candidateOp
+                                ? candidateOp.operatorName
+                                : "Helper Tandem"
+                            );
+                            showNotification(
+                              `Perbaikan Tandem diterapkan di Stasiun #${st.no}: Siklus dipangkas 50% & bottleneck teratasi.`
+                            );
+                          }}
+                          className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold flex items-center space-x-1.5 transition-colors cursor-pointer"
+                          title="Tambahkan mesin/operator tandem untuk memangkas siklus 50%"
+                        >
+                          <Zap className="w-3.5 h-3.5" />
+                          <span>Terapkan Tandem (Siklus -50%)</span>
+                        </button>
+                      )}
+
+                      {/* 3. Direct Operator Swap / Station Adjust */}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setAdjustingProcess({
+                            no: st.no,
+                            process: st.process,
+                            section: st.section,
+                            machine: st.machine,
+                            operatorName: st.operatorName,
+                          })
+                        }
+                        className="px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-bold flex items-center space-x-1 transition-colors cursor-pointer"
+                      >
+                        <Edit2 className="w-3.5 h-3.5" />
+                        <span>Ganti Operator</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
-        </div>
+        ) : (
+          <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200 text-emerald-900 text-xs flex items-center space-x-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            <span>
+              Seluruh 26 stasiun pada Line {lineData.lineId} beroperasi normal tanpa hambatan bottleneck.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Confirmation Modal: Kosongkan Data Jam */}
@@ -1417,8 +1644,22 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
             </div>
 
             <p className="text-xs text-slate-500 leading-relaxed">
-              Fitur ini akan mengisi target default (10 pcs) untuk seluruh stasiun yang operatornya hadir pada jam ke-{batchHourModal}.
+              Fitur ini akan mengisi output jam ke-{batchHourModal} secara otomatis sesuai target untuk seluruh stasiun yang operatornya hadir.
             </p>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-700 block">
+                Nilai Output / Target Jam ke-{batchHourModal} (pcs):
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                value={batchHourCustomVal}
+                onChange={(e) => setBatchHourCustomVal(e.target.value)}
+                className="w-full px-3 py-2 border border-blue-400 rounded-xl font-mono font-bold text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
 
             <div className="flex items-center justify-end space-x-2 pt-3 border-t border-slate-100">
               <button
@@ -1429,15 +1670,27 @@ export const HourlyProductionSheet: React.FC<HourlyProductionSheetProps> = ({
               </button>
               <button
                 onClick={() => {
+                  const customVal = fmt2(
+                    parseFloat(batchHourCustomVal) || avgTargetPerHour || 10
+                  );
                   lineData.rows.forEach((r) => {
                     const isPresent = r.operatorAttendance === "HADIR";
-                    onUpdateHourlyOutput(r.no, batchHourModal - 1, isPresent ? 10 : 0, 0);
+                    const rowTgt = fmt2(r.targetPerHour || customVal);
+                    onUpdateHourlyOutput(
+                      r.no,
+                      batchHourModal - 1,
+                      isPresent ? (batchHourCustomVal !== "" ? customVal : rowTgt) : 0,
+                      0
+                    );
                   });
                   setBatchHourModal(null);
+                  showNotification(
+                    `Jam ke-${batchHourModal} otomatis terisi (${customVal} pcs) sesuai input target.`
+                  );
                 }}
                 className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold"
               >
-                Isi Standar (10 pcs)
+                Isi Sesuai Target ({fmt2(parseFloat(batchHourCustomVal) || avgTargetPerHour)} pcs)
               </button>
             </div>
           </div>

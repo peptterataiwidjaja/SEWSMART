@@ -387,182 +387,114 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Attendance Summary Banner */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-            Total Manpower Line
-          </div>
-          <div className="text-2xl font-extrabold text-slate-800 mt-1 font-mono">
-            {total} <span className="text-xs text-slate-500 font-sans font-medium">Operator</span>
-          </div>
-          <div className="text-[11px] text-slate-500 mt-0.5">Line {lineId} Active Pool</div>
+          <div className="text-[11px] font-bold text-slate-500">Total Operator</div>
+          <div className="text-2xl font-black text-slate-800 mt-0.5 font-mono">{total}</div>
         </div>
 
         <div className="bg-emerald-50 p-3.5 rounded-2xl border border-emerald-200 shadow-xs">
-          <div className="text-[10px] uppercase font-bold text-emerald-700 tracking-wider flex items-center justify-between">
-            <span>Operator Hadir</span>
+          <div className="text-[11px] font-bold text-emerald-700 flex items-center justify-between">
+            <span>Hadir</span>
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
           </div>
-          <div className="text-2xl font-extrabold text-emerald-700 mt-1 font-mono">{hadirCount}</div>
-          <div className="text-[11px] text-emerald-600 mt-0.5 font-semibold">Tersedia untuk Layout</div>
+          <div className="text-2xl font-black text-emerald-700 mt-0.5 font-mono">{hadirCount}</div>
         </div>
 
         <div className="bg-amber-50 p-3.5 rounded-2xl border border-amber-200 shadow-xs">
-          <div className="text-[10px] uppercase font-bold text-amber-700 tracking-wider">Sakit (Dokter)</div>
-          <div className="text-2xl font-extrabold text-amber-700 mt-1 font-mono">{sakitCount}</div>
-          <div className="text-[11px] text-amber-600 mt-0.5">Dikecualikan layout</div>
+          <div className="text-[11px] font-bold text-amber-700">Sakit</div>
+          <div className="text-2xl font-black text-amber-700 mt-0.5 font-mono">{sakitCount}</div>
         </div>
 
         <div className="bg-blue-50 p-3.5 rounded-2xl border border-blue-200 shadow-xs">
-          <div className="text-[10px] uppercase font-bold text-blue-700 tracking-wider">Izin & Cuti</div>
-          <div className="text-2xl font-extrabold text-blue-700 mt-1 font-mono">{izinCount + cutiCount}</div>
-          <div className="text-[11px] text-blue-600 mt-0.5">Izin: {izinCount} | Cuti: {cutiCount}</div>
+          <div className="text-[11px] font-bold text-blue-700">Izin / Cuti</div>
+          <div className="text-2xl font-black text-blue-700 mt-0.5 font-mono">{izinCount + cutiCount}</div>
         </div>
 
         <div className="bg-rose-50 p-3.5 rounded-2xl border border-rose-200 shadow-xs">
-          <div className="text-[10px] uppercase font-bold text-rose-700 tracking-wider">Alpha (Tanpa Kabar)</div>
-          <div className="text-2xl font-extrabold text-rose-700 mt-1 font-mono">{alphaCount}</div>
-          <div className="text-[11px] text-rose-600 mt-0.5">Perlu follow-up SPV</div>
+          <div className="text-[11px] font-bold text-rose-700">Alpha</div>
+          <div className="text-2xl font-black text-rose-700 mt-0.5 font-mono">{alphaCount}</div>
         </div>
 
         <div className="bg-slate-900 text-white p-3.5 rounded-2xl shadow-xs">
-          <div className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Tingkat Kehadiran</div>
-          <div className="text-2xl font-extrabold text-emerald-400 mt-1 font-mono">{attendanceRate}%</div>
-          <div className="text-[11px] text-slate-300 mt-0.5">
-            {absentTotal > 0 ? `${absentTotal} Orang Absen` : "100% Lengkap"}
-          </div>
+          <div className="text-[11px] font-bold text-slate-300">Kehadiran</div>
+          <div className="text-2xl font-black text-emerald-400 mt-0.5 font-mono">{attendanceRate}%</div>
         </div>
       </div>
 
-      {/* Warning Notice if operators are absent */}
+      {/* Compact Warning Notice if operators are absent */}
       {absentTotal > 0 && (
-        <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-xl flex items-start space-x-3 text-amber-900 text-xs">
-          <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <span className="font-bold block text-sm">
-              Perhatian Sistem Line Balancing: {absentTotal} Operator Tidak Hadir pada Line {lineId}
-            </span>
-            <p className="leading-relaxed">
-              Sesuai aturan engineering garmen, sistem secara otomatis <strong>hanya mengalokasikan operator berstatus HADIR</strong> untuk proses penempatan stasiun dan kalkulasi layout rekomendasi. Proses yang operator aslinya absen dialihkan ke operator cadangan yang hadir berdasarkan Skill Matrix & Grading.
-            </p>
-          </div>
+        <div className="bg-amber-50 border border-amber-300 px-4 py-2.5 rounded-xl flex items-center space-x-2.5 text-amber-900 text-xs font-medium">
+          <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>
+            <strong>{absentTotal} Operator Absen:</strong> Stasiun kosong otomatis dialihkan ke operator cadangan yang hadir.
+          </span>
         </div>
       )}
 
-      {/* Grading Parameter Guide Box (Interactive Toggle) */}
+      {/* Grading Parameter Guide Box (Compact Toggle) */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
         <div
           onClick={() => setIsGradingGuideOpen(!isGradingGuideOpen)}
-          className="p-4 bg-gradient-to-r from-slate-50 to-blue-50/40 hover:bg-slate-100/70 cursor-pointer flex items-center justify-between border-b border-slate-200 transition-colors"
+          className="px-4 py-3 bg-slate-50/70 hover:bg-slate-100/70 cursor-pointer flex items-center justify-between transition-colors"
         >
           <div className="flex items-center space-x-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center">
-              <Award className="w-4 h-4" />
-            </div>
-            <div>
-              <h3 className="font-bold text-sm text-slate-900 flex items-center space-x-2">
-                <span>Parameter & Kriteria Penentuan Grading Operator Sewing</span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-bold">
-                  Standar Industrial Engineering (IE)
-                </span>
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Panduan tolok ukur penentuan Grade A, B, C, dan D berdasarkan Efisiensi, Defect Rate, dan Skill Matrix multi-mesin.
-              </p>
-            </div>
+            <Award className="w-4 h-4 text-blue-600" />
+            <span className="font-bold text-xs text-slate-800">
+              Panduan Kriteria Grade Operator (A - D)
+            </span>
           </div>
 
           <button
             type="button"
-            className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-bold hover:bg-slate-50 transition-colors flex items-center space-x-1.5 shadow-2xs"
+            className="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-slate-700 text-xs font-bold hover:bg-slate-50 transition-colors flex items-center space-x-1"
           >
-            <span>{isGradingGuideOpen ? "Sembunyikan Panduan" : "Buka Parameter Grading"}</span>
+            <span>{isGradingGuideOpen ? "Tutup" : "Lihat Kriteria"}</span>
             {isGradingGuideOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
         </div>
 
         {isGradingGuideOpen && (
-          <div className="p-5 space-y-4 bg-slate-50/50">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 border-t border-slate-200 bg-slate-50/50">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
               {GRADING_PARAMETERS_GUIDE.map((g) => (
                 <div
                   key={g.grade}
-                  className="bg-white rounded-2xl p-4 border border-slate-200 shadow-xs flex flex-col justify-between space-y-3"
+                  className="bg-white rounded-xl p-3.5 border border-slate-200 shadow-2xs space-y-2 text-xs"
                 >
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-extrabold border ${g.badgeClass}`}>
-                        {g.label}
-                      </span>
-                      <span className="text-[10px] font-mono text-slate-400">Parameter IE</span>
-                    </div>
-
-                    <h4 className="font-bold text-xs text-slate-900 mt-2.5">{g.title}</h4>
-
-                    <div className="mt-3 space-y-2 text-xs">
-                      <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Tolok Ukur Efisiensi:</span>
-                        <span className="font-semibold text-slate-800 text-[11px]">{g.efficiencyCriteria}</span>
-                      </div>
-
-                      <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Toleransi Defect QC:</span>
-                        <span className="font-semibold text-slate-800 text-[11px]">{g.defectCriteria}</span>
-                      </div>
-
-                      <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
-                        <span className="text-[10px] uppercase font-bold text-slate-400 block">Kriteria Skill Matrix:</span>
-                        <span className="font-semibold text-slate-800 text-[11px]">{g.skillMatrixCriteria}</span>
-                      </div>
-
-                      <div className="p-2 rounded-xl bg-blue-50/80 border border-blue-200">
-                        <span className="text-[10px] uppercase font-bold text-blue-700 block flex items-center space-x-1">
-                          <Shirt className="w-3 h-3 text-blue-600" />
-                          <span>Kriteria Kemampuan Produk:</span>
-                        </span>
-                        <span className="font-semibold text-blue-950 text-[11px] block mt-0.5">
-                          {g.productMatrixCriteria}
-                        </span>
-                      </div>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-extrabold border ${g.badgeClass}`}>
+                      {g.label}
+                    </span>
                   </div>
-
-                  <div className="pt-2 border-t border-slate-100 text-[11px] text-slate-600 space-y-1">
-                    <div>
-                      <strong className="text-slate-800">Alokasi Line:</strong> {g.roleAndPlacement}
-                    </div>
-                    <div className="text-[10px] text-slate-500 italic">
-                      {g.actionGuidance}
-                    </div>
+                  <div className="font-bold text-slate-900">{g.title}</div>
+                  <div className="space-y-1 text-[11px] text-slate-600 pt-1 border-t border-slate-100">
+                    <div><strong>Efisiensi:</strong> {g.efficiencyCriteria}</div>
+                    <div><strong>Defect:</strong> {g.defectCriteria}</div>
+                    <div><strong>Mesin:</strong> {g.skillMatrixCriteria}</div>
+                    <div><strong>Produk:</strong> {g.productMatrixCriteria}</div>
                   </div>
                 </div>
               ))}
-            </div>
-
-            <div className="p-3 bg-blue-50/80 rounded-xl border border-blue-200 text-xs text-blue-900 flex items-start space-x-2">
-              <Info className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />
-              <div className="leading-relaxed">
-                <strong>Catatan Engineering:</strong> Operator berstatus <strong>Grade A & B</strong> diprioritaskan oleh algoritma optimasi layout untuk mengisi operasi bottleneck (SMV tertinggi) dan proses dengan risiko cacat kritis (contoh: pasang kerah, bobok kantong, set sleeve). Operator <strong>Grade C & D</strong> diarahkan ke operasi jahitan lurus standar atau ditandemkan dengan trainer.
-              </div>
             </div>
           </div>
         )}
       </div>
 
       {/* Control Bar: Filters & Quick Actions */}
-      <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+      <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
           {/* Search Box */}
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Cari nama, NIK, skill, mesin..."
+              placeholder="Cari operator / NIK..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none w-52 sm:w-60"
+              className="pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:bg-white outline-none w-48 sm:w-56"
             />
           </div>
 
@@ -578,7 +510,7 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                {st === "ALL" ? `Semua Presensi (${total})` : st}
+                {st === "ALL" ? "Semua" : st}
               </button>
             ))}
           </div>
@@ -595,7 +527,7 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
                     : "text-slate-600 hover:text-slate-900"
                 }`}
               >
-                {gr === "ALL" ? "Semua Grade" : `Gr. ${gr}`}
+                {gr === "ALL" ? "Semua Grade" : gr}
               </button>
             ))}
           </div>
@@ -605,25 +537,21 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
         <div className="flex items-center space-x-2">
           {canEdit && (
             <>
-              {/* Tambah Operator Button */}
               <button
                 id="btn-add-operator"
                 onClick={() => setIsAddModalOpen(true)}
                 className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center space-x-1.5"
-                title="Tambah operator baru ke Line ini"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Tambah Operator</span>
+                <span>Tambah</span>
               </button>
 
-              {/* Set All Hadir */}
               <button
                 onClick={onBatchSetAllHadir}
                 className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center space-x-1.5"
-                title={`Setel semua operator Line ${lineId} menjadi HADIR`}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Setel Semua Hadir</span>
+                <span className="hidden sm:inline">Semua Hadir</span>
               </button>
             </>
           )}
@@ -632,71 +560,44 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
             <button
               onClick={onOpenSimpleBWPrint}
               className="px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 rounded-xl text-xs font-bold transition-colors shadow-2xs flex items-center space-x-1.5"
-              title="Cetak Presensi & Skill Matrix Operator Hitam Putih A4"
             >
               <Printer className="w-3.5 h-3.5 text-black" />
-              <span>Print Hitam Putih</span>
+              <span>Print</span>
             </button>
           )}
-
-          <div className="text-xs text-slate-500 pl-2 border-l border-slate-200">
-            {isPE ? (
-              <span className="inline-flex items-center text-blue-700 font-semibold">
-                <Shield className="w-3.5 h-3.5 mr-1" /> Hak Akses PE
-              </span>
-            ) : (
-              <span className="text-slate-600 font-medium">Admin Line {lineId}</span>
-            )}
-          </div>
         </div>
       </div>
 
       {/* Operators Attendance & Skill Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-slate-900 text-sm">
-              Daftar Presensi Harian, Skill Matrix & Grading Operator Sewing
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Line {lineId} &bull; Total {total} Operator terdaftar &bull; Klik status kehadiran untuk presensi langsung, atau klik Skill Matrix untuk mengedit keahlian mesin.
-            </p>
-          </div>
-          <div className="text-xs font-mono bg-slate-100 px-3 py-1 rounded-lg font-semibold text-slate-700">
-            {filteredOperators.length} Operator ditampilkan
-          </div>
-        </div>
-
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase tracking-wider text-[10px]">
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px]">
                 <th className="py-3 px-3 w-10 text-center">No</th>
-                <th className="py-3 px-3">NIK & Nama Operator</th>
-                <th className="py-3 px-3">Status Kehadiran</th>
-                <th className="py-3 px-3">Keterangan</th>
+                <th className="py-3 px-3">Operator</th>
+                <th className="py-3 px-3">Kehadiran</th>
+                <th className="py-3 px-3">Catatan</th>
                 <th className="py-3 px-3 text-center">Grade</th>
-                <th className="py-3 px-3 min-w-[210px]">Kemampuan Produk (10 Garment)</th>
+                <th className="py-3 px-3 min-w-[180px]">Produk</th>
                 <th className="py-3 px-3 text-center">Efisiensi</th>
                 <th className="py-3 px-3 text-center">Defect</th>
-                <th className="py-3 px-3">Skill Utama & Matriks Mesin</th>
-                <th className="py-3 px-3">Stasiun Asal</th>
-                <th className="py-3 px-3 text-right">Aksi</th>
+                <th className="py-3 px-3">Skill Mesin</th>
+                <th className="py-3 px-3">Stasiun</th>
+                <th className="py-3 px-3 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredOperators.length === 0 ? (
                 <tr>
                   <td colSpan={11} className="py-8 text-center text-slate-400">
-                    Tidak ada operator yang cocok dengan kriteria pencarian atau filter.
+                    Tidak ada operator yang cocok.
                   </td>
                 </tr>
               ) : (
                 filteredOperators.map((op, idx) => {
                   const badge = getGradeBadge(op.grade);
                   const isHadir = op.attendanceStatus === "HADIR";
-
-                  // Number of machines with score >= 3
                   const multiSkillCount = Object.values(op.skills || {}).filter((s) => Number(s) >= 3).length;
 
                   return (
@@ -712,16 +613,13 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
 
                       <td className="py-2.5 px-3">
                         <div className="font-bold text-slate-900">{op.name}</div>
-                        <div className="text-[10px] text-slate-400 font-mono flex items-center space-x-1.5">
-                          <span>{op.nik}</span>
-                          {op.experienceYears && <span>&bull; {op.experienceYears} thn</span>}
-                        </div>
+                        <div className="text-[10px] text-slate-400 font-mono">{op.nik}</div>
                       </td>
 
                       {/* Attendance Status Buttons */}
                       <td className="py-2.5 px-3">
                         {canEdit ? (
-                          <div className="inline-flex rounded-lg shadow-2xs border border-slate-200 overflow-hidden bg-white">
+                          <div className="inline-flex rounded-lg border border-slate-200 overflow-hidden bg-white">
                             {(["HADIR", "SAKIT", "IZIN", "CUTI", "ALPHA"] as AttendanceStatus[]).map(
                               (st) => {
                                 const isSelected = op.attendanceStatus === st;
@@ -739,7 +637,6 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
                                     key={st}
                                     onClick={() => onUpdateOperatorAttendance(op.id, st, op.attendanceNotes)}
                                     className={`px-2 py-1 text-[10px] transition-colors ${color}`}
-                                    title={`Tandai ${op.name} sebagai ${st}`}
                                   >
                                     {st}
                                   </button>
@@ -767,7 +664,7 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
                       </td>
 
                       {/* Attendance Notes */}
-                      <td className="py-2.5 px-3 text-slate-500 text-[11px] max-w-[120px] truncate">
+                      <td className="py-2.5 px-3 text-slate-500 text-[11px] max-w-[110px] truncate">
                         {op.attendanceNotes || "—"}
                       </td>
 
@@ -775,57 +672,23 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
                       <td className="py-2.5 px-3 text-center">
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-extrabold ${badge?.lightBg} ${badge?.text} border ${badge?.border}`}
-                          title={`Grading: ${op.grade} (Efisiensi ${op.efficiency}%, Defect ${op.defectRate}%)`}
                         >
-                          {badge?.label}
+                          {op.grade}
                         </span>
                       </td>
 
-                      {/* Kemampuan Pembuatan Produk (10 Garment) */}
+                      {/* Kemampuan Pembuatan Produk */}
                       <td className="py-2.5 px-3">
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between space-x-1.5">
-                            <span className="text-[11px] font-bold text-slate-800 flex items-center space-x-1">
-                              <Shirt className="w-3.5 h-3.5 text-blue-600" />
-                              <span>{op.masteredProducts?.length || 0}/10 Produk</span>
-                            </span>
-                            <button
-                              onClick={() => handleOpenProductMatrix(op)}
-                              className="px-2 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] font-bold transition-colors flex items-center space-x-1 shadow-2xs"
-                              title="Kelola & Evaluasi Kemampuan 10 Produk Garmen"
-                            >
-                              <Layers className="w-3 h-3 text-blue-600" />
-                              <span>{canEdit ? "Evaluasi Produk" : "Lihat Produk"}</span>
-                            </button>
-                          </div>
-
-                          {/* Preview tags of mastered products */}
-                          <div className="flex flex-wrap gap-1 max-w-[240px]">
-                            {op.masteredProducts && op.masteredProducts.length > 0 ? (
-                              op.masteredProducts.slice(0, 4).map((p) => {
-                                const isHigh = ["Jas", "Blazer", "Wearpack", "Jaket"].includes(p);
-                                return (
-                                  <span
-                                    key={p}
-                                    className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
-                                      isHigh
-                                        ? "bg-purple-100 text-purple-800 border border-purple-200"
-                                        : "bg-slate-100 text-slate-700 border border-slate-200"
-                                    }`}
-                                  >
-                                    {p}
-                                  </span>
-                                );
-                              })
-                            ) : (
-                              <span className="text-[10px] text-slate-400 italic">Belum ada data</span>
-                            )}
-                            {op.masteredProducts && op.masteredProducts.length > 4 && (
-                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-blue-50 text-blue-700">
-                                +{op.masteredProducts.length - 4} lainnya
-                              </span>
-                            )}
-                          </div>
+                        <div className="flex items-center space-x-2">
+                          <span className="text-[11px] font-bold text-slate-700 font-mono">
+                            {op.masteredProducts?.length || 0}/10
+                          </span>
+                          <button
+                            onClick={() => handleOpenProductMatrix(op)}
+                            className="px-2 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] font-bold transition-colors"
+                          >
+                            Produk
+                          </button>
                         </div>
                       </td>
 
@@ -865,35 +728,28 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
 
                       {/* Primary Skill & Skill Matrix Modal Trigger */}
                       <td className="py-2.5 px-3">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-[11px] truncate max-w-[130px]">
+                        <div className="flex items-center space-x-1.5">
+                          <span className="font-semibold text-slate-800 bg-slate-100 px-2 py-0.5 rounded text-[11px] truncate max-w-[110px]">
                             {op.primarySkill}
                           </span>
                           <button
                             onClick={() => handleOpenSkillMatrix(op)}
                             className="px-2 py-0.5 rounded bg-blue-50 hover:bg-blue-100 text-blue-700 text-[10px] font-bold transition-colors flex items-center space-x-1"
-                            title="Buka dan Edit Skill Matrix Mesin"
                           >
                             <Star className="w-3 h-3 text-amber-500 fill-amber-400" />
-                            <span>{canEdit ? "Edit Skill" : "Lihat Skill"}</span>
-                            <span className="text-[9px] px-1 bg-blue-200/80 rounded-full font-mono">
-                              {multiSkillCount} Msn
-                            </span>
+                            <span>{multiSkillCount}</span>
                           </button>
                         </div>
                       </td>
 
                       {/* Assigned Station */}
                       <td className="py-2.5 px-3 text-[11px] text-slate-600">
-                        <div className="font-semibold text-slate-800 truncate max-w-[130px]">
+                        <div className="font-semibold text-slate-800 truncate max-w-[120px]">
                           {op.assignedProcessNo ? `#${op.assignedProcessNo} ${op.assignedProcessName}` : "—"}
-                        </div>
-                        <div className="text-[10px] text-slate-400 font-mono">
-                          {op.machineType || "Mesin Sewing"}
                         </div>
                       </td>
 
-                      {/* Actions: Edit Details & Delete Operator */}
+                      {/* Actions */}
                       <td className="py-2.5 px-3 text-right">
                         <div className="flex items-center justify-end space-x-1">
                           {canEdit && (
@@ -901,7 +757,7 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
                               <button
                                 onClick={() => setEditingOperator(op)}
                                 className="p-1 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-100"
-                                title="Edit Catatan Kehadiran, Grade & Efisiensi"
+                                title="Edit Operator"
                               >
                                 <Edit2 className="w-3.5 h-3.5" />
                               </button>
@@ -910,7 +766,7 @@ export const OperatorAttendanceSheet: React.FC<OperatorAttendanceSheetProps> = (
                                 <button
                                   onClick={() => setOperatorToDelete(op)}
                                   className="p-1 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                                  title={`Hapus ${op.name} dari line ini`}
+                                  title="Hapus"
                                 >
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
