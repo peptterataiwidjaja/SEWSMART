@@ -38,6 +38,7 @@ interface AccountAccessManagerProps {
   onUpdateUser: (updatedUser: User) => void;
   onDeleteUser: (userId: string) => void;
   onUpdateNavBars: (newBars: NavBarConfig[]) => void;
+  onOpenApiKeyManager?: () => void;
 }
 
 export const AccountAccessManager: React.FC<AccountAccessManagerProps> = ({
@@ -48,6 +49,7 @@ export const AccountAccessManager: React.FC<AccountAccessManagerProps> = ({
   onUpdateUser,
   onDeleteUser,
   onUpdateNavBars,
+  onOpenApiKeyManager,
 }) => {
   // State for Adding a New User
   const [newUsername, setNewUsername] = useState("");
@@ -277,8 +279,20 @@ export const AccountAccessManager: React.FC<AccountAccessManagerProps> = ({
             </p>
           </div>
         </div>
-        <div className="flex items-center space-x-2 text-xs font-mono bg-blue-50 text-blue-800 border border-blue-200 px-3 py-1.5 rounded-xl">
-          <span>Total Akun: {users.length}</span>
+        <div className="flex items-center space-x-2">
+          {onOpenApiKeyManager && (
+            <button
+              type="button"
+              onClick={onOpenApiKeyManager}
+              className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 border border-indigo-200 text-xs font-bold flex items-center space-x-1.5 transition-colors shadow-2xs"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
+              <span>Kelola Kunci API</span>
+            </button>
+          )}
+          <div className="text-xs font-mono bg-blue-50 text-blue-800 border border-blue-200 px-3 py-2 rounded-xl font-bold">
+            Total Akun: {users.length}
+          </div>
         </div>
       </div>
 

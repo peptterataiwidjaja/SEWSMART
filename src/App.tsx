@@ -25,7 +25,7 @@
  * - Export to Excel (.xlsx) & Comprehensive PDF Layout Print Reports (F-IE-008-00)
  */
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   ProcessItem,
   StyleMetadata,
@@ -80,6 +80,7 @@ import { GoogleScriptModal } from "./components/GoogleScriptModal";
 import { LoginScreen } from "./components/LoginScreen";
 import { SimpleBWPrintModal } from "./components/SimpleBWPrintModal";
 import { AccountAccessManager } from "./components/AccountAccessManager";
+import { ApiKeyManagerModal } from "./components/ApiKeyManagerModal";
 
 export default function App() {
   // Navigation & Line Selection
@@ -265,6 +266,7 @@ export default function App() {
   const [isPrintReportOpen, setIsPrintReportOpen] = useState(false);
   const [isSimpleBWPrintOpen, setIsSimpleBWPrintOpen] = useState(false);
   const [isGoogleScriptModalOpen, setIsGoogleScriptModalOpen] = useState(false);
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
 
   // PE-controlled Alarm Cancellation State per Line (Only PE can cancel from PE Dashboard)
   const [cancelledAlarmLines, setCancelledAlarmLines] = useState<Record<number, boolean>>({});
@@ -318,6 +320,99 @@ export default function App() {
   const locationUsage = useMemo(() => {
     return calculateLocationSpecificUsage(linesBP, selectedLine);
   }, [linesBP, selectedLine]);
+
+  // Real-Time Central Server Synchronization for Multi-User across all devices
+  const [serverSyncTime, setServerSyncTime] = useState<string>("Sinkron");
+  const [serverVersion, setServerVersion] = useState<number>(0);
+
+  // Poll central system state every 3.5 seconds
+  useEffect(() => {
+    let isMounted = true;
+    const fetchSystemState = async () => {
+      try {
+        const res = await fetch("/api/v1/system/state");
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.success && isMounted) {
+          // If version has advanced or initial load
+          if (data.version && data.version !== serverVersion) {
+            setServerVersion(data.version);
+
+            if (Array.isArray(data.users) && data.users.length > 0) {
+              setUsers(data.users);
+              try { localStorage.setItem("sewsmart_users_v5", JSON.stringify(data.users)); } catch (e) {}
+            }
+            if (data.linesData && typeof data.linesData === "object" && Object.keys(data.linesData).length > 0) {
+              setLinesData((prev) => ({ ...prev, ...data.linesData }));
+              try { localStorage.setItem("sewsmart_lines_data_v4", JSON.stringify(data.linesData)); } catch (e) {}
+            }
+            if (Array.isArray(data.operators) && data.operators.length > 0) {
+              setOperators(data.operators);
+              try { localStorage.setItem("sewsmart_operators_v4", JSON.stringify(data.operators)); } catch (e) {}
+            }
+            if (data.linesBP && typeof data.linesBP === "object" && Object.keys(data.linesBP).length > 0) {
+              setLinesBP(data.linesBP);
+              try { localStorage.setItem("sewsmart_lines_bp_v4", JSON.stringify(data.linesBP)); } catch (e) {}
+            }
+            if (Array.isArray(data.dailyLogs) && data.dailyLogs.length > 0) {
+              setDailyLogs(data.dailyLogs);
+              try { localStorage.setItem("sewsmart_daily_logs_v4", JSON.stringify(data.dailyLogs)); } catch (e) {}
+            }
+            if (Array.isArray(data.navBars) && data.navBars.length > 0) {
+              setNavBars(data.navBars);
+              try { localStorage.setItem("sewsmart_nav_bars_v5", JSON.stringify(data.navBars)); } catch (e) {}
+            }
+          }
+
+          const nowTime = new Date().toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          });
+          setServerSyncTime(nowTime);
+        }
+      } catch (e) {}
+    };
+
+    fetchSystemState();
+    const interval = setInterval(fetchSystemState, 3500);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [serverVersion]);
+
+  // Debounced push of linesData changes to central server
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetch("/api/v1/system/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ linesData }),
+      })
+        .then((r) => r.json())
+        .then((res) => {
+          if (res.version) setServerVersion(res.version);
+        })
+        .catch(() => {});
+    }, 600);
+    return () => clearTimeout(timer);
+  }, [linesData]);
+
+  const handleRefreshServerData = async () => {
+    try {
+      const res = await fetch("/api/v1/system/state");
+      const data = await res.json();
+      if (data.success) {
+        if (data.linesData) setLinesData((prev) => ({ ...prev, ...data.linesData }));
+        if (data.operators) setOperators(data.operators);
+        if (data.users) setUsers(data.users);
+        if (data.linesBP) setLinesBP(data.linesBP);
+        if (data.version) setServerVersion(data.version);
+      }
+    } catch (e) {}
+  };
 
   // Active machine requirements: Exactly 26 machines for line, with location stock (TW1 vs TW38) & factory deduction
   const activeMachineRequirements = useMemo(() => {
@@ -412,6 +507,18 @@ export default function App() {
       return updated;
     });
     syncUserWithLineData(newUser);
+
+    // Save to central server
+    fetch("/api/v1/users", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newUser),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.version) setServerVersion(res.version);
+      })
+      .catch(() => {});
   };
 
   const handleUpdateUser = (updatedUser: User) => {
@@ -431,6 +538,18 @@ export default function App() {
     }
 
     syncUserWithLineData(updatedUser);
+
+    // Save to central server
+    fetch(`/api/v1/users/${updatedUser.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updatedUser),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.version) setServerVersion(res.version);
+      })
+      .catch(() => {});
   };
 
   const handleDeleteUser = (userId: string) => {
@@ -446,6 +565,16 @@ export default function App() {
       } catch (e) {}
       return updated;
     });
+
+    // Delete on central server
+    fetch(`/api/v1/users/${userId}`, {
+      method: "DELETE",
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.version) setServerVersion(res.version);
+      })
+      .catch(() => {});
   };
 
   const handleUpdateNavBars = (newBars: NavBarConfig[]) => {
@@ -453,6 +582,18 @@ export default function App() {
     try {
       localStorage.setItem("sewsmart_nav_bars_v5", JSON.stringify(newBars));
     } catch (e) {}
+
+    // Save to central server
+    fetch("/api/v1/nav-bars", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ navBars: newBars }),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.version) setServerVersion(res.version);
+      })
+      .catch(() => {});
   };
 
   const handleUpdateUserName = (userId: string, newName: string) => {
@@ -513,6 +654,18 @@ export default function App() {
       return next;
     });
 
+    // Save BP to central server
+    fetch(`/api/v1/lines/${lineId}/bp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bp: updatedBP }),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.version) setServerVersion(res.version);
+      })
+      .catch(() => {});
+
     // Re-generate line rows with the new processes for this specific line
     setLinesData((prev) => {
       const lineOps = operators.filter((o) => o.line === lineId);
@@ -561,6 +714,17 @@ export default function App() {
       return next;
     });
 
+    fetch(`/api/v1/lines/${selectedLine}/bp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bp: updatedBP }),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.version) setServerVersion(res.version);
+      })
+      .catch(() => {});
+
     setLinesData((prev) => {
       const lineOps = operators.filter((o) => o.line === selectedLine);
       const newSheet = generateInitialLineRows(selectedLine, filteredProcesses, lineOps);
@@ -596,6 +760,17 @@ export default function App() {
       } catch (e) {}
       return next;
     });
+
+    fetch(`/api/v1/lines/${selectedLine}/bp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ bp: updatedBP }),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.version) setServerVersion(res.version);
+      })
+      .catch(() => {});
   };
 
   // SAVE DAILY REPORT LOG (September 2026)
@@ -614,6 +789,18 @@ export default function App() {
       } catch (e) {}
       return updated;
     });
+
+    // Save log to central server
+    fetch("/api/v1/daily-logs", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ log: newLog }),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.version) setServerVersion(res.version);
+      })
+      .catch(() => {});
   };
 
   // ATTENDANCE UPDATE HANDLER
@@ -637,6 +824,18 @@ export default function App() {
       } catch (e) {}
       return next;
     });
+
+    // Save attendance to central server
+    fetch("/api/v1/operators/attendance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ operatorId, status, notes }),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.version) setServerVersion(res.version);
+      })
+      .catch(() => {});
 
     // Synchronize attendance flag on current line rows
     setLinesData((prev) => {
@@ -685,6 +884,18 @@ export default function App() {
       } catch (e) {}
       return next;
     });
+
+    // Save batch attendance to central server
+    fetch("/api/v1/operators/batch-attendance", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lineId: selectedLine, status: "HADIR" }),
+    })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.version) setServerVersion(res.version);
+      })
+      .catch(() => {});
 
     setLinesData((prev) => {
       const lineObj = prev[selectedLine];
@@ -1365,6 +1576,7 @@ export default function App() {
         currentUser={currentUser}
         users={users}
         navBars={navBars}
+        serverSyncTime={serverSyncTime}
         onSwitchUser={handleSwitchUser}
         onLogout={handleLogout}
         onOpenTargetAnalysis={() => setIsTargetAnalysisOpen(true)}
@@ -1373,6 +1585,7 @@ export default function App() {
         onOpenLoginModal={() => setIsLoginModalOpen(true)}
         onOpenGoogleScript={() => setIsGoogleScriptModalOpen(true)}
         isGoogleScriptConnected={!!googleScriptConfig.webAppUrl}
+        onOpenApiKeyManager={() => setIsApiKeyModalOpen(true)}
         onClearData={() => handleClearLineHourlyData(selectedLine)}
         onExportExcel={() =>
           exportProductionSheetToExcel(activeMetadata, selectedLine, currentLineData.rows)
@@ -1532,6 +1745,7 @@ export default function App() {
             onUpdateUser={handleUpdateUser}
             onDeleteUser={handleDeleteUser}
             onUpdateNavBars={handleUpdateNavBars}
+            onOpenApiKeyManager={() => setIsApiKeyModalOpen(true)}
           />
         )}
       </main>
@@ -1625,6 +1839,14 @@ export default function App() {
         machineRequirements={activeMachineRequirements}
         dailyLogs={dailyLogs}
         selectedDate={selectedDate}
+      />
+
+      {/* API Key Management & Live Monitoring Modal */}
+      <ApiKeyManagerModal
+        isOpen={isApiKeyModalOpen}
+        onClose={() => setIsApiKeyModalOpen(false)}
+        currentLine={selectedLine}
+        onRefreshData={handleRefreshServerData}
       />
     </div>
   );

@@ -542,4 +542,36 @@ export interface DashboardSyncPayload {
   }>;
 }
 
+export type ApiKeyPermission = "read" | "write" | "admin";
 
+export interface ApiKeyItem {
+  id: string;
+  key: string;
+  name: string;
+  role: UserRole | "viewer";
+  assignedLine?: LineNumber; // undefined means all lines
+  permissions: ApiKeyPermission[];
+  createdAt: string;
+  lastUsedAt?: string;
+  usageCount: number;
+  isActive: boolean;
+  notes?: string;
+}
+
+export interface LineMonitoringSummary {
+  lineId: LineNumber;
+  name: string;
+  location: "TW1" | "TW38";
+  supervisor: string;
+  targetPerHour: number;
+  targetPerDay: number;
+  actualOutput: number;
+  efficiency: number;
+  totalDefects: number;
+  defectRate: number;
+  bottlenecksCount: number;
+  presentOperators: number;
+  totalOperators: number;
+  status: "NORMAL" | "WARNING" | "CRITICAL";
+  lastUpdated: string;
+}

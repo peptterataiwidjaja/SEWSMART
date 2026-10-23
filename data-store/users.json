@@ -1,0 +1,129 @@
+[
+  {
+    "id": "user-pe",
+    "username": "PE",
+    "password": "pe123",
+    "name": "Ir. Budi Santoso (PE Head)",
+    "role": "production_engineer",
+    "title": "Production Engineer (Akses Penuh)",
+    "lastLogin": "2026-10-23 06:49",
+    "allowedTabs": [
+      "hourly",
+      "attendance",
+      "excel",
+      "layout",
+      "inventory",
+      "daily",
+      "pe-dashboard",
+      "account-access"
+    ]
+  },
+  {
+    "id": "user-spv-line1",
+    "username": "spv_line1",
+    "password": "line1_123",
+    "name": "Edwar Permana, S.T.",
+    "role": "admin_line",
+    "assignedLine": 1,
+    "title": "Supervisor Line 1 Sewing (TW1)",
+    "lastLogin": "2026-10-23 06:49",
+    "allowedTabs": [
+      "hourly",
+      "attendance",
+      "excel",
+      "layout",
+      "inventory",
+      "daily"
+    ]
+  },
+  {
+    "id": "user-spv-line3",
+    "username": "spv_line3",
+    "password": "line3_123",
+    "name": "Rahmat Hidayat",
+    "role": "admin_line",
+    "assignedLine": 3,
+    "title": "Supervisor Line 3 Sewing (TW1)",
+    "lastLogin": "2026-09-26 08:00",
+    "allowedTabs": [
+      "hourly",
+      "attendance",
+      "excel",
+      "layout",
+      "inventory",
+      "daily"
+    ]
+  },
+  {
+    "id": "user-spv-line4",
+    "username": "spv_line4",
+    "password": "line4_123",
+    "name": "Surya Kencana",
+    "role": "admin_line",
+    "assignedLine": 4,
+    "title": "Supervisor Line 4 Sewing (TW38)",
+    "lastLogin": "2026-09-26 08:00",
+    "allowedTabs": [
+      "hourly",
+      "attendance",
+      "excel",
+      "layout",
+      "inventory",
+      "daily"
+    ]
+  },
+  {
+    "id": "user-spv-line5",
+    "username": "spv_line5",
+    "password": "line5_123",
+    "name": "Dedi Supriyadi",
+    "role": "admin_line",
+    "assignedLine": 5,
+    "title": "Supervisor Line 5 Sewing (TW38)",
+    "lastLogin": "2026-09-26 08:00",
+    "allowedTabs": [
+      "hourly",
+      "attendance",
+      "excel",
+      "layout",
+      "inventory",
+      "daily"
+    ]
+  },
+  {
+    "id": "user-spv-line6",
+    "username": "spv_line6",
+    "password": "line6_123",
+    "name": "Asep Sunandar",
+    "role": "admin_line",
+    "assignedLine": 6,
+    "title": "Supervisor Line 6 Sewing (TW38)",
+    "lastLogin": "2026-09-26 08:00",
+    "allowedTabs": [
+      "hourly",
+      "attendance",
+      "excel",
+      "layout",
+      "inventory",
+      "daily"
+    ]
+  },
+  {
+    "id": "user-spv-line7",
+    "username": "spv_line7",
+    "password": "line7_123",
+    "name": "Hadi Gunawan",
+    "role": "admin_line",
+    "assignedLine": 7,
+    "title": "Supervisor Line 7 Sewing (TW38)",
+    "lastLogin": "2026-09-26 08:00",
+    "allowedTabs": [
+      "hourly",
+      "attendance",
+      "excel",
+      "layout",
+      "inventory",
+      "daily"
+    ]
+  }
+]

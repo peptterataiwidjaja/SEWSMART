@@ -48,7 +48,8 @@ interface NavbarProps {
   onOpenGoogleScript?: () => void;
   isGoogleScriptConnected?: boolean;
   onClearData?: () => void;
-  onOpenSimpleBWPrint?: () => void;
+  onOpenApiKeyManager?: () => void;
+  serverSyncTime?: string;
   buyerStyle?: string;
   bottleneckCount: number;
   unassignedCount: number;
@@ -63,11 +64,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   setSelectedLine,
   currentUser,
   navBars = DEFAULT_NAV_BARS,
+  serverSyncTime,
   onOpenTargetAnalysis,
   onOpenPrintReport,
   onOpenLoginModal,
   onLogout,
   onOpenSimpleBWPrint,
+  onOpenApiKeyManager,
   bottleneckCount,
   unassignedCount,
   attendancePresentCount,
@@ -120,13 +123,23 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Main Top Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 border-b border-slate-100">
-          {/* Brand Logo */}
+          {/* Brand Logo & Cloud Sync Status */}
           <div className="flex items-center space-x-3">
             <Logo
               size="md"
               editable
               onOpenUpload={() => setIsLogoModalOpen(true)}
             />
+            {serverSyncTime && (
+              <div
+                className="hidden sm:inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200/90 text-[10px] font-semibold text-emerald-800"
+                title="Penyimpanan terpusat aktif: Setiap inputan tersimpan di server dan otomatis sinkron antar perangkat"
+              >
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+                <span>Multi-User Terhubung</span>
+                <span className="font-mono text-emerald-600 font-normal">({serverSyncTime})</span>
+              </div>
+            )}
           </div>
 
           {/* Right Controls */}
@@ -166,6 +179,19 @@ export const Navbar: React.FC<NavbarProps> = ({
               >
                 <Printer className="w-3.5 h-3.5 text-slate-700" />
                 <span>Cetak</span>
+              </button>
+            )}
+
+            {/* API Key & Monitoring Button */}
+            {onOpenApiKeyManager && (
+              <button
+                id="btn-nav-api-key"
+                onClick={onOpenApiKeyManager}
+                className="inline-flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-900 border border-blue-200 text-xs font-bold transition-colors whitespace-nowrap shadow-2xs"
+                title="Kelola Kunci API & Monitoring Real-Time"
+              >
+                <KeyRound className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                <span className="hidden sm:inline">Kunci API</span>
               </button>
             )}
 
@@ -248,6 +274,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                       >
                         <UserCog className="w-3.5 h-3.5 text-blue-600" />
                         <span>Akses Akun</span>
+                      </button>
+                    )}
+
+                    {onOpenApiKeyManager && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsUserDropdownOpen(false);
+                          onOpenApiKeyManager();
+                        }}
+                        className="w-full text-left px-3 py-1.5 rounded-lg text-xs font-semibold text-indigo-700 hover:bg-indigo-50 flex items-center space-x-2 transition-colors"
+                      >
+                        <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>Kunci API & Monitoring</span>
                       </button>
                     )}
 
@@ -418,6 +458,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                 >
                   <Printer className="w-3.5 h-3.5 text-black" />
                   <span>Print Hitam Putih</span>
+                </button>
+              )}
+
+              {onOpenApiKeyManager && (
+                <button
+                  id="btn-open-api-key-util-bar"
+                  onClick={onOpenApiKeyManager}
+                  className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-900 text-xs font-bold transition-all border border-indigo-200 shadow-2xs"
+                >
+                  <KeyRound className="w-3.5 h-3.5 text-indigo-600" />
+                  <span>Kunci API & Integrasi</span>
                 </button>
               )}
             </div>
